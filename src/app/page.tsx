@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { getRooms, initializeRooms } from '../utils/roomsData';
 import { useRouter } from 'next/navigation';
-import { Instagram, Loader2, Info } from 'lucide-react';
+import { Instagram, Loader2, Info, Youtube } from 'lucide-react';
 import { AboutDialog } from '../components/AboutDialog';
 
 export default function Home() {
@@ -141,6 +141,14 @@ export default function Home() {
           className="hover:text-white transition-colors p-2"
         >
           <Instagram className="w-5 h-5" />
+        </a>
+        <a 
+          href="https://www.youtube.com/@NaturesLoops/" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          className="hover:text-white transition-colors p-2"
+        >
+          <Youtube className="w-5 h-5" />
         </a>
         <button
           onClick={() => setShowAbout(true)}

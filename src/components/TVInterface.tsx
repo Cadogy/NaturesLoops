@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
-import { Instagram, Maximize2, Minimize2, Home, Info } from 'lucide-react';
+import { Instagram, Maximize2, Minimize2, Home, Info, Youtube } from 'lucide-react';
 import * as Dialog from '@radix-ui/react-dialog';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { useYouTubePlayer } from '../contexts/YouTubePlayerContext';
@@ -240,6 +240,24 @@ export function TVInterface({ room, onChannelChange, allRooms, initialVideos }: 
                   <Tooltip.Portal>
                     <Tooltip.Content className="bg-black/90 text-white text-xs px-2 py-1 rounded">
                       Instagram
+                    </Tooltip.Content>
+                  </Tooltip.Portal>
+                </Tooltip.Root>
+
+                <Tooltip.Root>
+                  <Tooltip.Trigger asChild>
+                    <a 
+                      href="https://www.youtube.com/@NaturesLoops/" 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="hover:text-white transition-colors p-2"
+                    >
+                      <Youtube className="w-5 h-5" />
+                    </a>
+                  </Tooltip.Trigger>
+                  <Tooltip.Portal>
+                    <Tooltip.Content className="bg-black/90 text-white text-xs px-2 py-1 rounded">
+                      YouTube
                     </Tooltip.Content>
                   </Tooltip.Portal>
                 </Tooltip.Root>
