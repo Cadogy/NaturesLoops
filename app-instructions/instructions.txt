@@ -1,0 +1,30 @@
+Create a new NextJS 14 app router project. Use tailwindcss and mongodb if needed. Install required packages as well.
+Use this structure and description to make this app.
+
+/project-root
+  ├── /public
+  │   ├── /audio             // Directory for audio files
+  │   ├── /images            // Directory for image assets
+  │   └── favicon.ico        // Site favicon
+  ├── /src
+  │   ├── /components        // Reusable React components
+  │   │   ├── AudioPlayer.js // Custom audio player component
+  │   │   ├── RoomCard.js    // Component for displaying room options
+  │   │   ├── Header.js      // Site header and navigation
+  │   │   └── Footer.js      // Site footer
+  │   ├── /pages
+  │   │   ├── index.js       // Homepage listing available rooms
+  │   │   └── [roomId].js    // Dynamic route for individual room pages
+  │   ├── /styles
+  │   │   ├── globals.css    // Global CSS styles
+  │   │   └── Room.module.css// Styles specific to room components
+  │   ├── /utils
+  │   │   └── roomsData.js   // Data file containing room information
+  │   └── app.js             // Main application component
+  ├── .gitignore             // Git ignore file
+  ├── package.json           // NPM package configuration
+  └── README.md              // Project documentation
+
+an online platform that offers continuous streams of lofi music tailored for activities like studying, working, and relaxing. Users can select from various themed "rooms," each providing a unique auditory ambiance to suit different moods and tasks. The website emphasizes simplicity and ease of use, allowing users to quickly choose a room and start listening without any complex setup.
+
+We are cloning the @https://www.lofi.cafe/
