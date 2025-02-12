@@ -3,13 +3,14 @@ import { getRooms, type Room } from '../../../utils/roomsData';
 import RoomClient from './room-client';
 import { redirect } from 'next/navigation';
 
-interface RoomPageProps {
+interface Props {
   params: {
     id: string;
   };
+  searchParams: { [key: string]: string | string[] | undefined };
 }
 
-export async function generateMetadata({ params }: RoomPageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const rooms = await getRooms();
   const room = rooms.find((r: Room) => r.id === params.id);
 
@@ -44,7 +45,7 @@ export async function generateMetadata({ params }: RoomPageProps): Promise<Metad
   };
 }
 
-export default async function RoomPage({ params }: RoomPageProps) {
+export default async function RoomPage({ params }: Props) {
   const rooms = await getRooms();
   
   // If no rooms are initialized yet, redirect to home page
