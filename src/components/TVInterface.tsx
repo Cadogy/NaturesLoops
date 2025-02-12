@@ -229,7 +229,7 @@ export function TVInterface({ room, onChannelChange, allRooms, initialVideos }: 
                 <Tooltip.Root>
                   <Tooltip.Trigger asChild>
                     <a 
-                      href="https://instagram.com/@NaturesLoops" 
+                      href="https://instagram.com/NaturesLoops" 
                       target="_blank" 
                       rel="noopener noreferrer" 
                       className="hover:text-white transition-colors p-2"

@@ -85,8 +85,6 @@ export function AboutDialog({ isOpen, onClose }: AboutDialogProps) {
               <li>Retro TV interface with CRT effects</li>
               <li>Channel switching experience</li>
               <li>Keyboard shortcuts for playback control</li>
-              <li>Mobile-responsive design</li>
-              <li>Dark mode optimized</li>
             </ul>
           </div>
 
@@ -95,7 +93,7 @@ export function AboutDialog({ isOpen, onClose }: AboutDialogProps) {
               <span className="text-green-400">$</span> cat version.txt
             </p>
             <p className="text-xs sm:text-sm text-white/60">
-              Version 1.0.0 - Released 2024
+              Version 1.0.0 - Released 2025
             </p>
           </div>
 
@@ -104,7 +102,7 @@ export function AboutDialog({ isOpen, onClose }: AboutDialogProps) {
               <span className="text-green-400">$</span> echo &quot;Made with ❤️ in the USA&quot;
             </p>
             <p className="text-xs sm:text-sm text-white/40 mt-2">
-              © 2024 Nature&apos;s Loops. All rights reserved.
+              © 2025 Nature&apos;s Loops. All rights reserved.
             </p>
           </div>
         </div>

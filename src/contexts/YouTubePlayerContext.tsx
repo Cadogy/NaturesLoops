@@ -42,6 +42,21 @@ const STORAGE_KEYS = {
 
 const DEFAULT_VOLUME = 50;
 
+// Add safe storage access utility
+const safeStorage = {
+  getItem: (key: string): string | null => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem(key);
+    }
+    return null;
+  },
+  setItem: (key: string, value: string): void => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(key, value);
+    }
+  },
+};
+
 export function YouTubePlayerProvider({ children }: { children: React.ReactNode }) {
   const playerRef = useRef<YouTubePlayer | null>(null);
   const [isReady, setIsReady] = useState(false);
@@ -50,12 +65,24 @@ export function YouTubePlayerProvider({ children }: { children: React.ReactNode 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [playerState, setPlayerState] = useState<PlayerState>({
     isPlaying: false,
-    volume: Number(localStorage.getItem(STORAGE_KEYS.VOLUME)) || DEFAULT_VOLUME,
-    isMuted: localStorage.getItem(STORAGE_KEYS.MUTED) === 'true',
+    volume: DEFAULT_VOLUME,
+    isMuted: false,
     currentTime: 0,
     duration: 0,
     isReady: false,
   });
+
+  // Initialize state from localStorage after mount
+  useEffect(() => {
+    const savedVolume = safeStorage.getItem(STORAGE_KEYS.VOLUME);
+    const savedMuted = safeStorage.getItem(STORAGE_KEYS.MUTED);
+    
+    setPlayerState(state => ({
+      ...state,
+      volume: savedVolume ? Number(savedVolume) : DEFAULT_VOLUME,
+      isMuted: savedMuted === 'true',
+    }));
+  }, []);
 
   // Update current time
   useEffect(() => {
@@ -157,7 +184,7 @@ export function YouTubePlayerProvider({ children }: { children: React.ReactNode 
   const setVolume = useCallback((volume: number) => {
     if (!playerRef.current || !isReady) return;
     playerRef.current.setVolume(volume);
-    localStorage.setItem(STORAGE_KEYS.VOLUME, volume.toString());
+    safeStorage.setItem(STORAGE_KEYS.VOLUME, volume.toString());
     setPlayerState(state => ({ ...state, volume }));
   }, [isReady]);
 
@@ -166,10 +193,10 @@ export function YouTubePlayerProvider({ children }: { children: React.ReactNode 
     
     if (playerState.isMuted) {
       playerRef.current.unMute();
-      localStorage.setItem(STORAGE_KEYS.MUTED, 'false');
+      safeStorage.setItem(STORAGE_KEYS.MUTED, 'false');
     } else {
       playerRef.current.mute();
-      localStorage.setItem(STORAGE_KEYS.MUTED, 'true');
+      safeStorage.setItem(STORAGE_KEYS.MUTED, 'true');
     }
     
     setPlayerState(state => ({ ...state, isMuted: !state.isMuted }));
