@@ -25,7 +25,7 @@ export function AboutDialog({ isOpen, onClose }: AboutDialogProps) {
           {/* Introduction */}
           <div className="text-white/80 space-y-2">
             <p className="text-sm sm:text-base">
-              <span className="text-green-400">$</span> echo &quot;Welcome to Nature&apos;s Loops&quot;
+              <span className="text-green-400">$</span> Welcome to Nature&apos;s Loops
             </p>
             <p className="text-xs sm:text-sm text-white/60 leading-relaxed">
               A curated collection of lo-fi music channels inspired by nature&apos;s beauty.
@@ -37,7 +37,7 @@ export function AboutDialog({ isOpen, onClose }: AboutDialogProps) {
           {/* Team Section */}
           <div className="text-white/80 space-y-3">
             <p className="text-sm sm:text-base">
-              <span className="text-green-400">$</span> cat team.json
+              <span className="text-green-400">$</span> team
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
               {[
@@ -80,7 +80,7 @@ export function AboutDialog({ isOpen, onClose }: AboutDialogProps) {
           </div>
 
           {/* Features Section */}
-          <div className="text-white/80 space-y-3">
+          {/* <div className="text-white/80 space-y-3">
             <p className="text-sm sm:text-base">
               <span className="text-green-400">$</span> cat features.txt
             </p>
@@ -90,12 +90,12 @@ export function AboutDialog({ isOpen, onClose }: AboutDialogProps) {
               <li>Channel switching experience</li>
               <li>Keyboard shortcuts for playback control</li>
             </ul>
-          </div>
+          </div> */}
 
           {/* Version Info */}
           <div className="text-white/80 space-y-3">
             <p className="text-sm sm:text-base">
-              <span className="text-green-400">$</span> cat version.txt
+              <span className="text-green-400">$</span> version
             </p>
             <p className="text-xs sm:text-sm text-white/60">Version 1.0.0 - Released 2025</p>
           </div>
@@ -103,7 +103,7 @@ export function AboutDialog({ isOpen, onClose }: AboutDialogProps) {
           {/* Footer Section */}
           <div className="text-white/80 space-y-3">
             <p className="text-sm sm:text-base">
-              <span className="text-green-400">$</span> echo &quot;Made with ❤️ in the USA&quot;
+              <span className="text-green-400">$</span> Made with ❤️ in the USA&quot;
             </p>
             <p className="text-xs sm:text-sm text-white/40 mt-2">
               © 2025 Nature&apos;s Loops. All rights reserved.

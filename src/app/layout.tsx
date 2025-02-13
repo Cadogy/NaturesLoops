@@ -80,9 +80,9 @@ export default function RootLayout({
         <link rel="manifest" href="/site.webmanifest" />
         <meta name="theme-color" content="#000000" />
       </head>
-      <body className={`${inter.className} ${poppins.variable} overflow-hidden`}>
+      <body className={`${inter.className} ${poppins.variable}`}>
         <Providers>
-          <main className="h-screen w-screen">
+          <main className="h-full w-full">
             {children}
           </main>
         </Providers>

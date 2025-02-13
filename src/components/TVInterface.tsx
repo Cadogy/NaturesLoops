@@ -298,7 +298,7 @@ export function TVInterface({ room, onChannelChange, allRooms, initialVideos }: 
             {/* Room Info - Dialog Trigger */}
             <Dialog.Trigger asChild>
               <button 
-                className="fixed z-[101] bottom-20 sm:bottom-2 left-4 flex items-center gap-4 p-3 rounded-lg 
+                className="fixed z-[101] bottom-28 sm:bottom-2 left-4 flex items-center gap-4 p-3 rounded-lg 
                           bg-black/0 backdrop-blur-sm hover:bg-black/60 transition-colors
                           focus:outline-none focus:ring-2 focus:ring-white/20"
                 onClick={(e) => e.stopPropagation()}

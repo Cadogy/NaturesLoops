@@ -20,6 +20,54 @@ export default function RoomClient({ initialRoom, allRooms }: RoomClientProps) {
   const [videos, setVideos] = useState<YouTubeVideo[]>([]);
   const { togglePlay, toggleMute } = useYouTubePlayer();
 
+  // Track user presence in room
+  useEffect(() => {
+    // Add user to room
+    const addUserToRoom = () => {
+      try {
+        const roomsData = JSON.parse(localStorage.getItem('activeRooms') || '{}');
+        roomsData[initialRoom.id] = (roomsData[initialRoom.id] || 0) + 1;
+        localStorage.setItem('activeRooms', JSON.stringify(roomsData));
+        // Dispatch storage event for other tabs
+        window.dispatchEvent(new StorageEvent('storage', {
+          key: 'activeRooms',
+          newValue: JSON.stringify(roomsData)
+        }));
+      } catch (error) {
+        console.error('Error adding user to room:', error);
+      }
+    };
+
+    // Remove user from room
+    const removeUserFromRoom = () => {
+      try {
+        const roomsData = JSON.parse(localStorage.getItem('activeRooms') || '{}');
+        if (roomsData[initialRoom.id] > 0) {
+          roomsData[initialRoom.id]--;
+          if (roomsData[initialRoom.id] === 0) {
+            delete roomsData[initialRoom.id];
+          }
+          localStorage.setItem('activeRooms', JSON.stringify(roomsData));
+          // Dispatch storage event for other tabs
+          window.dispatchEvent(new StorageEvent('storage', {
+            key: 'activeRooms',
+            newValue: JSON.stringify(roomsData)
+          }));
+        }
+      } catch (error) {
+        console.error('Error removing user from room:', error);
+      }
+    };
+
+    // Add user when entering room
+    addUserToRoom();
+
+    // Clean up when component unmounts or room changes
+    return () => {
+      removeUserFromRoom();
+    };
+  }, [initialRoom.id]);
+
   // Handle keyboard shortcuts
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
