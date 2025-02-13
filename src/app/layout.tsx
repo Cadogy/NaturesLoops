@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     description: 'Experience the harmony of nature and lo-fi music in a unique retro TV interface.',
     images: [
       {
-        url: 'https://naturesloops.com/og-image.jpg',
+        url: 'https://naturesloops.com/images/og-image.jpg',
         width: 1200,
         height: 630,
         alt: "Nature's Loops - Immersive Lo-Fi Music Experience",
