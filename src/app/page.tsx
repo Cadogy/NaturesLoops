@@ -185,7 +185,7 @@ export default function Home() {
   };
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-b from-gray-900 to-black overflow-hidden">
+    <div className="relative min-h-[100dvh] bg-gradient-to-b from-gray-900 to-black overflow-hidden">
       {/* Background Image */}
       <div className="absolute inset-0">
         <img
@@ -204,16 +204,16 @@ export default function Home() {
       </div>
 
       {/* Content */}
-      <div className="relative z-40 min-h-screen flex flex-col items-center justify-center p-4">
+      <div className="relative z-40 min-h-[100dvh] flex flex-col items-center justify-center p-4 sm:p-6">
         {/* Logo and Content Container */}
-        <div className="text-center p-6 sm:p-10 backdrop-blur-md border border-white/20 rounded-xl w-full max-w-lg mx-auto">
-          <h1 className="font-poppins text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-3 sm:mb-4">
+        <div className="text-center p-4 sm:p-6 md:p-10 backdrop-blur-md border border-white/20 rounded-xl w-full max-w-lg mx-auto">
+          <h1 className="font-poppins text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2 sm:mb-3">
             Nature&apos;s Loops
           </h1>
-          <p className="text-white/90 text-base sm:text-lg mb-2 sm:mb-4 max-w-lg mx-auto font-mono">
+          <p className="text-white/90 text-sm sm:text-base md:text-lg mb-1 sm:mb-2 max-w-lg mx-auto font-mono">
             the curated collection of lofi music.
           </p>
-          <p className="text-white/70 text-xs sm:text-sm mb-6 sm:mb-8 max-w-xl mx-auto font-mono">
+          <p className="text-white/70 text-xs sm:text-sm mb-4 sm:mb-6 max-w-xl mx-auto font-mono">
             Each room offers a unique atmosphere for studying, working, or relaxing.
           </p>
 
@@ -366,7 +366,7 @@ export default function Home() {
 
       {/* Footer */}
       <div className="absolute bottom-2 sm:bottom-4 left-0 right-0 text-center z-50">
-        <p className="text-white/40 text-xs sm:text-sm font-mono px-4">
+        <p className="text-white/40 text-[10px] sm:text-xs md:text-sm font-mono px-2 sm:px-4">
           {isMobile ? (
             "Tap screen edges to exit • Space to play/pause"
           ) : (
