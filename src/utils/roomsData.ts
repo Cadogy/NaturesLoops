@@ -43,19 +43,29 @@ const roomDefaults = {
 // Initialize rooms array
 let rooms: Room[] = [];
 let isInitialized = false;
+let lastInitTime = 0;
+const INIT_COOLDOWN = 5 * 60 * 1000; // 5 minutes in milliseconds
 
 // Function to initialize rooms from YouTube playlists
 export const initializeRooms = async () => {
   try {
-    // If already initialized, return current rooms
-    if (isInitialized && rooms.length > 0) {
+    const now = Date.now();
+    // Only return cached rooms if they were initialized recently
+    if (isInitialized && rooms.length > 0 && (now - lastInitTime) < INIT_COOLDOWN) {
       return rooms;
     }
 
     const playlists = await getChannelPlaylists();
     console.log('Fetched playlists:', playlists);
 
-    rooms = playlists.map((playlist, index) => {
+    // Filter out any invalid playlists (e.g., deleted or private)
+    const validPlaylists = playlists.filter(playlist => 
+      playlist.id && 
+      playlist.title && 
+      playlist.videoCount > 0
+    );
+
+    rooms = validPlaylists.map((playlist, index) => {
       // Determine category based on playlist name or index
       const category = determineCategory(playlist.title, index);
       const defaults = roomDefaults[category];
@@ -64,7 +74,6 @@ export const initializeRooms = async () => {
         id: playlist.id,
         name: playlist.title,
         description: playlist.description || `Enjoy the vibes of ${playlist.title}`,
-        // Use playlist thumbnail if available, fallback to default image
         image: playlist.thumbnail || defaults.image,
         playlistId: playlist.id,
         category,
@@ -75,10 +84,14 @@ export const initializeRooms = async () => {
     });
 
     isInitialized = true;
+    lastInitTime = now;
     console.log('Initialized rooms:', rooms);
     return rooms;
   } catch (error) {
     console.error('Error initializing rooms:', error);
+    // If there's an error, clear the cache to force a refresh next time
+    isInitialized = false;
+    rooms = [];
     return [];
   }
 };

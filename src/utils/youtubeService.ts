@@ -3,6 +3,8 @@ const CHANNEL_ID = 'UC2UhrbIufB22XF9l8OklzGw'; // Nature's Loops channel ID
 
 // Cache for playlists and videos
 let playlistsCache: YouTubePlaylist[] | null = null;
+let lastFetchTime = 0;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
 const videosCache: { [key: string]: YouTubeVideo[] } = {};
 
 interface YouTubeSnippet {
@@ -76,8 +78,9 @@ export class YouTubeApiError extends Error {
 
 export const getChannelPlaylists = async (): Promise<YouTubePlaylist[]> => {
   try {
-    // Return cached playlists if available
-    if (playlistsCache) {
+    // Check if cache is still valid
+    const now = Date.now();
+    if (playlistsCache && (now - lastFetchTime) < CACHE_DURATION) {
       return playlistsCache;
     }
 
@@ -88,7 +91,7 @@ export const getChannelPlaylists = async (): Promise<YouTubePlaylist[]> => {
     // Get all playlists from the channel
     const playlistResponse = await fetch(
       `https://youtube.googleapis.com/youtube/v3/playlists?part=snippet,contentDetails&channelId=${CHANNEL_ID}&maxResults=50&key=${YOUTUBE_API_KEY}`,
-      { next: { revalidate: 3600 } } // Cache for 1 hour
+      { cache: 'no-store' } // Disable Next.js cache to always get fresh data
     );
 
     if (!playlistResponse.ok) {
@@ -118,6 +121,7 @@ export const getChannelPlaylists = async (): Promise<YouTubePlaylist[]> => {
       videos: [],
     }));
 
+    lastFetchTime = now;
     return playlistsCache;
   } catch (error) {
     console.error('Error fetching playlists:', error);
@@ -127,8 +131,9 @@ export const getChannelPlaylists = async (): Promise<YouTubePlaylist[]> => {
 
 export const getPlaylistVideos = async (playlistId: string): Promise<YouTubeVideo[]> => {
   try {
-    // Return cached videos if available
-    if (videosCache[playlistId]) {
+    // Check if cache is still valid
+    const now = Date.now();
+    if (videosCache[playlistId] && (now - lastFetchTime) < CACHE_DURATION) {
       return videosCache[playlistId];
     }
 
@@ -141,7 +146,7 @@ export const getPlaylistVideos = async (playlistId: string): Promise<YouTubeVide
     // Get all videos from the playlist
     const apiUrl = `https://youtube.googleapis.com/youtube/v3/playlistItems?part=snippet,contentDetails&maxResults=50&playlistId=${playlistId}&key=${YOUTUBE_API_KEY}`;
     const response = await fetch(apiUrl, {
-      next: { revalidate: 3600 } // Cache for 1 hour
+      cache: 'no-store' // Disable Next.js cache to always get fresh data
     });
 
     if (!response.ok) {
@@ -185,6 +190,7 @@ export const getPlaylistVideos = async (playlistId: string): Promise<YouTubeVide
     
     // Cache the videos
     videosCache[playlistId] = videos;
+    lastFetchTime = now;
     return videos;
 
   } catch (error) {
