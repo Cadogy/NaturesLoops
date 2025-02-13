@@ -11,11 +11,8 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: {
-    default: "Nature's Loops - Immersive Lo-Fi Music Experience",
-    template: "%s | Nature's Loops"
-  },
-  description: 'Experience the harmony of nature and lo-fi music in a unique retro TV interface. Perfect for studying, working, or relaxing.',
+  title: "Nature's Loops",
+  description: "A curated collection of lo-fi music channels inspired by nature's beauty",
   keywords: ['lofi', 'music', 'nature', 'study', 'relax', 'ambient', 'tv interface', 'retro'],
   authors: [{ name: 'Kevin Knapp' }],
   creator: 'Kevin Knapp',
@@ -48,9 +45,17 @@ export const metadata: Metadata = {
     creator: '@NaturesLoops',
   },
   icons: {
-    icon: '/favicon.ico',
-    shortcut: '/favicon-16x16.png',
-    apple: '/apple-touch-icon.png',
+    icon: [
+      { url: '/icons/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/icons/favicon-32x32.png', sizes: '32x32', type: 'image/png' }
+    ],
+    apple: [
+      { url: '/icons/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }
+    ],
+    other: [
+      { url: '/icons/android-chrome-192x192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icons/android-chrome-512x512.png', sizes: '512x512', type: 'image/png' }
+    ]
   },
   manifest: '/site.webmanifest',
   viewport: {
@@ -69,7 +74,11 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
+        <link rel="manifest" href="/site.webmanifest" />
+        <meta name="theme-color" content="#000000" />
       </head>
       <body className={`${inter.className} ${poppins.variable} overflow-hidden`}>
         <Providers>
