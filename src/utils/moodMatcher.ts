@@ -1,21 +1,131 @@
 import { Room } from './roomsData';
 
-// Define comprehensive mood and context categories
+// Define comprehensive mood and context categories with multilingual support
 const moodContexts = {
   chill: {
-    primary: ['relaxed', 'calm', 'peaceful', 'mellow', 'zen', 'tranquil', 'laid-back', 'easy-going'],
-    related: ['comfortable', 'content', 'cozy', 'restful', 'casual', 'light', 'steady', 'balanced', 'cool'],
-    activities: ['reading', 'napping', 'lounging', 'chilling', 'resting', 'breathing', 'meditating'],
-    locations: ['couch', 'bed', 'hammock', 'garden', 'patio', 'balcony'],
-    timeOfDay: ['evening', 'sunset', 'dusk', 'night'],
-    weather: ['mild', 'warm', 'sunny', 'breezy'],
-    seasons: ['spring', 'summer'],
+    primary: [
+      // English
+      'relaxed', 'calm', 'peaceful', 'mellow', 'zen', 'tranquil', 'laid-back', 'easy-going',
+      // Spanish
+      'relajado', 'tranquilo', 'calmado', 'sereno', 'pacifico', 'suave',
+      // French
+      'détendu', 'calme', 'paisible', 'tranquille', 'zen', 'serein',
+      // German
+      'entspannt', 'ruhig', 'friedlich', 'gelassen', 'gemütlich',
+      // Italian
+      'rilassato', 'calmo', 'tranquillo', 'sereno', 'pacifico'
+    ],
+    related: [
+      // English
+      'comfortable', 'content', 'cozy', 'restful', 'casual', 'light', 'steady', 'balanced', 'cool',
+      // Spanish
+      'comodo', 'contento', 'acogedor', 'casual', 'ligero', 'equilibrado', 'fresco',
+      // French
+      'confortable', 'content', 'douillet', 'reposant', 'léger', 'équilibré', 'cool',
+      // German
+      'bequem', 'zufrieden', 'behaglich', 'ausgewogen', 'locker', 'kühl',
+      // Italian
+      'comodo', 'contento', 'accogliente', 'riposante', 'leggero', 'equilibrato'
+    ],
+    activities: [
+      // English
+      'reading', 'napping', 'lounging', 'chilling', 'resting', 'breathing', 'meditating',
+      // Spanish
+      'leer', 'siesta', 'descansar', 'relajarse', 'respirar', 'meditar',
+      // French
+      'lire', 'sieste', 'se reposer', 'respirer', 'méditer',
+      // German
+      'lesen', 'schlafen', 'ausruhen', 'atmen', 'meditieren',
+      // Italian
+      'leggere', 'riposare', 'rilassarsi', 'respirare', 'meditare'
+    ],
+    locations: [
+      // English + Universal
+      'couch', 'bed', 'hammock', 'garden', 'patio', 'balcony',
+      // Spanish
+      'sofa', 'cama', 'hamaca', 'jardin', 'terraza', 'balcon',
+      // French
+      'canapé', 'lit', 'hamac', 'jardin', 'terrasse', 'balcon',
+      // German
+      'sofa', 'bett', 'hängematte', 'garten', 'terrasse', 'balkon',
+      // Italian
+      'divano', 'letto', 'amaca', 'giardino', 'terrazza', 'balcone'
+    ],
+    timeOfDay: [
+      // English
+      'evening', 'sunset', 'dusk', 'night',
+      // Spanish
+      'tarde', 'atardecer', 'anochecer', 'noche',
+      // French
+      'soir', 'coucher de soleil', 'crépuscule', 'nuit',
+      // German
+      'abend', 'sonnenuntergang', 'dämmerung', 'nacht',
+      // Italian
+      'sera', 'tramonto', 'crepuscolo', 'notte'
+    ],
+    weather: [
+      // English
+      'mild', 'warm', 'sunny', 'breezy',
+      // Spanish
+      'templado', 'calido', 'soleado', 'ventoso',
+      // French
+      'doux', 'chaud', 'ensoleillé', 'venteux',
+      // German
+      'mild', 'warm', 'sonnig', 'windig',
+      // Italian
+      'mite', 'caldo', 'soleggiato', 'ventoso'
+    ],
+    seasons: [
+      // English
+      'spring', 'summer',
+      // Spanish
+      'primavera', 'verano',
+      // French
+      'printemps', 'été',
+      // German
+      'frühling', 'sommer',
+      // Italian
+      'primavera', 'estate'
+    ],
     intensity: 0.6
   },
   upbeat: {
-    primary: ['happy', 'energetic', 'positive', 'motivated', 'excited', 'cheerful', 'lively', 'upbeat'],
-    related: ['optimistic', 'bright', 'uplifting', 'fun', 'joyful', 'enthusiastic', 'inspired', 'pumped'],
-    activities: ['dancing', 'exercising', 'running', 'working out', 'cleaning', 'cooking', 'creating'],
+    primary: [
+      // English
+      'happy', 'energetic', 'positive', 'motivated', 'excited', 'cheerful', 'lively', 'upbeat',
+      // Spanish
+      'feliz', 'energetico', 'positivo', 'motivado', 'emocionado', 'alegre', 'animado',
+      // French
+      'heureux', 'énergique', 'positif', 'motivé', 'excité', 'joyeux', 'vivant',
+      // German
+      'glücklich', 'energisch', 'positiv', 'motiviert', 'aufgeregt', 'fröhlich', 'lebendig',
+      // Italian
+      'felice', 'energico', 'positivo', 'motivato', 'eccitato', 'allegro', 'vivace'
+    ],
+    related: [
+      // English
+      'optimistic', 'bright', 'uplifting', 'fun', 'joyful', 'enthusiastic', 'inspired', 'pumped',
+      // Spanish
+      'optimista', 'brillante', 'divertido', 'alegre', 'entusiasta', 'inspirado',
+      // French
+      'optimiste', 'brillant', 'amusant', 'joyeux', 'enthousiaste', 'inspiré',
+      // German
+      'optimistisch', 'hell', 'spaßig', 'freudig', 'begeistert', 'inspiriert',
+      // Italian
+      'ottimista', 'brillante', 'divertente', 'gioioso', 'entusiasta', 'ispirato'
+    ],
+    activities: [
+      // English
+      'dancing', 'exercising', 'running', 'working out', 'cleaning', 'cooking', 'creating',
+      // Spanish
+      'bailar', 'ejercicio', 'correr', 'entrenar', 'limpiar', 'cocinar', 'crear',
+      // French
+      'danser', 'exercice', 'courir', 'entraîner', 'nettoyer', 'cuisiner', 'créer',
+      // German
+      'tanzen', 'trainieren', 'laufen', 'putzen', 'kochen', 'erschaffen',
+      // Italian
+      'ballare', 'esercizio', 'correre', 'allenare', 'pulire', 'cucinare', 'creare'
+    ],
     locations: ['gym', 'park', 'studio', 'kitchen', 'office'],
     timeOfDay: ['morning', 'sunrise', 'noon', 'afternoon'],
     weather: ['sunny', 'clear', 'bright'],
@@ -73,8 +183,30 @@ const moodContexts = {
     intensity: 0.9
   },
   sad: {
-    primary: ['sad', 'melancholic', 'nostalgic', 'emotional', 'reflective', 'sentimental'],
-    related: ['down', 'blue', 'gloomy', 'pensive', 'thoughtful', 'wistful', 'yearning'],
+    primary: [
+      // English
+      'sad', 'melancholic', 'nostalgic', 'emotional', 'reflective', 'sentimental',
+      // Spanish
+      'triste', 'melancolico', 'nostalgico', 'emocional', 'reflexivo', 'sentimental',
+      // French
+      'triste', 'mélancolique', 'nostalgique', 'émotionnel', 'réflexif', 'sentimental',
+      // German
+      'traurig', 'melancholisch', 'nostalgisch', 'emotional', 'nachdenklich', 'sentimental',
+      // Italian
+      'triste', 'malinconico', 'nostalgico', 'emotivo', 'riflessivo', 'sentimentale'
+    ],
+    related: [
+      // English
+      'down', 'blue', 'gloomy', 'pensive', 'thoughtful', 'wistful', 'yearning',
+      // Spanish
+      'deprimido', 'melancolico', 'pensativo', 'añoranza',
+      // French
+      'déprimé', 'mélancolique', 'pensif', 'nostalgique',
+      // German
+      'niedergeschlagen', 'melancholisch', 'nachdenklich', 'sehnsucht',
+      // Italian
+      'giù', 'malinconico', 'pensieroso', 'nostalgico'
+    ],
     activities: ['reflecting', 'thinking', 'remembering', 'writing', 'listening'],
     locations: ['bedroom', 'quiet place', 'window', 'alone'],
     timeOfDay: ['night', 'evening', 'late hours'],
@@ -83,8 +215,30 @@ const moodContexts = {
     intensity: 0.6
   },
   autumn: {
-    primary: ['autumn', 'fall', 'harvest', 'pumpkin', 'cozy', 'crisp'],
-    related: ['golden', 'leaves', 'amber', 'rustic', 'warm', 'earthy', 'mellow'],
+    primary: [
+      // English
+      'autumn', 'fall', 'harvest', 'pumpkin', 'cozy', 'crisp',
+      // Spanish
+      'otoño', 'cosecha', 'calabaza', 'acogedor',
+      // French
+      'automne', 'récolte', 'citrouille', 'confortable',
+      // German
+      'herbst', 'ernte', 'kürbis', 'gemütlich',
+      // Italian
+      'autunno', 'raccolto', 'zucca', 'accogliente'
+    ],
+    related: [
+      // English
+      'golden', 'leaves', 'amber', 'rustic', 'warm', 'earthy', 'mellow',
+      // Spanish
+      'dorado', 'hojas', 'ambar', 'rustico', 'calido', 'terroso',
+      // French
+      'doré', 'feuilles', 'ambre', 'rustique', 'chaleureux', 'terreux',
+      // German
+      'golden', 'blätter', 'bernstein', 'rustikal', 'warm', 'erdig',
+      // Italian
+      'dorato', 'foglie', 'ambra', 'rustico', 'caldo', 'terroso'
+    ],
     activities: ['reading', 'walking', 'drinking tea', 'baking', 'studying', 'reflecting'],
     locations: ['porch', 'garden', 'park', 'cafe', 'library', 'home'],
     timeOfDay: ['morning', 'afternoon', 'evening', 'dusk'],
@@ -94,12 +248,56 @@ const moodContexts = {
   }
 } as const;
 
-// Enhanced intensifiers with context modifiers
+// Enhanced intensifiers with multilingual support
 const intensifiers = {
-  high: ['very', 'super', 'extremely', 'really', 'quite', 'so', 'totally', 'absolutely', 'incredibly'],
-  medium: ['pretty', 'rather', 'fairly', 'somewhat', 'kind of', 'sort of'],
-  low: ['slightly', 'a bit', 'a little', 'mildly'],
-  negation: ['not', 'dont', 'cant', 'cannot', 'won\'t']
+  high: [
+    // English
+    'very', 'super', 'extremely', 'really', 'quite', 'so', 'totally', 'absolutely', 'incredibly',
+    // Spanish
+    'muy', 'super', 'extremadamente', 'realmente', 'totalmente', 'absolutamente', 'increiblemente',
+    // French
+    'très', 'super', 'extrêmement', 'vraiment', 'totalement', 'absolument', 'incroyablement',
+    // German
+    'sehr', 'super', 'extrem', 'wirklich', 'ganz', 'absolut', 'unglaublich',
+    // Italian
+    'molto', 'super', 'estremamente', 'davvero', 'totalmente', 'assolutamente', 'incredibilmente'
+  ],
+  medium: [
+    // English
+    'pretty', 'rather', 'fairly', 'somewhat', 'kind of', 'sort of',
+    // Spanish
+    'bastante', 'algo', 'mas o menos', 'un poco',
+    // French
+    'assez', 'plutôt', 'relativement', 'un peu',
+    // German
+    'ziemlich', 'eher', 'relativ', 'etwas',
+    // Italian
+    'abbastanza', 'piuttosto', 'relativamente', 'un po'
+  ],
+  low: [
+    // English
+    'slightly', 'a bit', 'a little', 'mildly',
+    // Spanish
+    'ligeramente', 'un poco', 'levemente',
+    // French
+    'légèrement', 'un peu', 'doucement',
+    // German
+    'leicht', 'ein bisschen', 'mild',
+    // Italian
+    'leggermente', 'un po', 'lievemente'
+  ],
+  negation: [
+    // English
+    'not', 'dont', 'cant', 'cannot', 'won\'t',
+    // Spanish
+    'no', 'nunca', 'tampoco',
+    // French
+    'ne', 'pas', 'non', 'jamais',
+    // German
+    'nicht', 'kein', 'nie',
+    // Italian
+    'non', 'mai', 'niente'
+  ]
 };
 
 // Add sentence patterns for better matching
