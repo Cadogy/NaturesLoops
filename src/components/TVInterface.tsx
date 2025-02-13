@@ -11,6 +11,18 @@ import YouTube from 'react-youtube';
 import AudioPlayer from './AudioPlayer';
 import { useRouter } from 'next/navigation';
 import { AboutDialog } from './AboutDialog';
+import type { YouTubeEvent } from 'react-youtube';
+
+declare global {
+  interface Window {
+    YT: {
+      PlayerState: {
+        ENDED: number;
+        UNSTARTED: number;
+      };
+    };
+  }
+}
 
 interface TVInterfaceProps {
   room: Room;
@@ -62,6 +74,22 @@ export function TVInterface({ room, onChannelChange, allRooms, initialVideos }: 
       setPlayerRoom(room, initialVideos);
     }
   }, [room, initialVideos, setPlayerRoom]);
+
+  // Ensure video plays on page load/refresh
+  const handlePlayerReady = useCallback((event: YouTubeEvent) => {
+    // Force playback to start
+    event.target.playVideo();
+    onPlayerReady(event);
+  }, [onPlayerReady]);
+
+  const handlePlayerStateChange = useCallback((event: YouTubeEvent) => {
+    // If video ends or is unstarted, try to play it
+    if (event.data === window.YT?.PlayerState?.ENDED || 
+        event.data === window.YT?.PlayerState?.UNSTARTED) {
+      event.target.playVideo();
+    }
+    onPlayerStateChange(event);
+  }, [onPlayerStateChange]);
 
   const handleChannelChange = useCallback(async (newRoom: Room) => {
     if (isLoading || newRoom.id === room.id) return;
@@ -138,8 +166,8 @@ export function TVInterface({ room, onChannelChange, allRooms, initialVideos }: 
                         playlist: currentVideo.id,
                       },
                     }}
-                    onReady={onPlayerReady}
-                    onStateChange={onPlayerStateChange}
+                    onReady={handlePlayerReady}
+                    onStateChange={handlePlayerStateChange}
                     className="w-full h-full"
                     iframeClassName="w-full h-full pointer-events-none !bg-black"
                     style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
@@ -269,38 +297,67 @@ export function TVInterface({ room, onChannelChange, allRooms, initialVideos }: 
 
             {/* Room Info - Dialog Trigger */}
             <Dialog.Trigger asChild>
-              <div 
-                className="absolute z-[101] bottom-20 sm:bottom-6 left-4 flex items-center gap-4 cursor-pointer hover:text-white/90"
+              <button 
+                className="fixed z-[101] bottom-20 sm:bottom-2 left-4 flex items-center gap-4 p-3 rounded-lg 
+                          bg-black/0 backdrop-blur-sm hover:bg-black/60 transition-colors
+                          focus:outline-none focus:ring-2 focus:ring-white/20"
                 onClick={(e) => e.stopPropagation()}
+                aria-label={`Current room: ${room.name}`}
               >
                 <div className="flex flex-col">
                   <span className="text-white/90 text-sm font-mono">{room.name}</span>
                   <span className="text-white/50 text-xs">{room.category}</span>
                 </div>
-              </div>
+              </button>
             </Dialog.Trigger>
 
             {/* Room Selector Dialog */}
             <Dialog.Portal>
-              <Dialog.Overlay className="fixed inset-0 bg-black/90 z-50" />
-              <Dialog.Content className="fixed inset-4 sm:inset-8 md:inset-16 z-50 outline-none overflow-y-auto">
-                <Dialog.Title className="sr-only">Select a Room</Dialog.Title>
-                <div className="h-full flex items-start justify-center pt-8 sm:pt-0">
-                  <div className="w-full max-w-[95vw] sm:max-w-[90vw] md:max-w-[85vw]">
+              <Dialog.Overlay className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50" />
+              <Dialog.Content 
+                className="fixed inset-0 z-50 outline-none overflow-y-auto"
+                onPointerDownOutside={(e) => e.preventDefault()}
+              >
+                <div className="min-h-full flex flex-col items-center px-4 py-6 sm:p-8">
+                  {/* Close Button */}
+                  <Dialog.Close asChild>
+                    <button 
+                      className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 
+                                transition-colors focus:outline-none focus:ring-2 focus:ring-white/20"
+                      aria-label="Close room selection"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </Dialog.Close>
+
+                  {/* Dialog Title */}
+                  <Dialog.Title className="text-white text-xl font-bold mb-6">
+                    Select a Room
+                  </Dialog.Title>
+
+                  {/* Room Grid */}
+                  <div className="w-full max-w-7xl mx-auto">
                     <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
                       {allRooms.map((r) => (
                         <Dialog.Close asChild key={r.id}>
                           <button
                             onClick={() => handleChannelChange(r)}
-                            className="relative aspect-video group overflow-hidden rounded-lg focus:outline-none focus:ring-2 focus:ring-white/20"
+                            className="relative aspect-video group overflow-hidden rounded-lg 
+                                     focus:outline-none focus:ring-2 focus:ring-white/20
+                                     active:scale-95 transition-transform"
+                            aria-label={`Switch to ${r.name}, Channel ${r.channelNumber}`}
                           >
                             <img
                               src={r.image}
-                              alt={r.name}
+                              alt=""
                               className="w-full h-full object-cover transition-transform group-hover:scale-105"
                             />
-                            <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                              <div className="text-center p-2">
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent 
+                                          flex items-end justify-start p-3
+                                          opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                              <div className="text-left">
                                 <h3 className="text-white font-bold text-sm sm:text-base">{r.name}</h3>
                                 <span className="text-white/70 text-xs font-mono">CH {r.channelNumber}</span>
                               </div>
