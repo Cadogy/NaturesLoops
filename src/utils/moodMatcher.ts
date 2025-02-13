@@ -13,7 +13,7 @@ const moodContexts = {
     intensity: 0.6
   },
   upbeat: {
-    primary: ['happy', 'energetic', 'positive', 'motivated', 'excited', 'cheerful', 'lively'],
+    primary: ['happy', 'energetic', 'positive', 'motivated', 'excited', 'cheerful', 'lively', 'upbeat'],
     related: ['optimistic', 'bright', 'uplifting', 'fun', 'joyful', 'enthusiastic', 'inspired', 'pumped'],
     activities: ['dancing', 'exercising', 'running', 'working out', 'cleaning', 'cooking', 'creating'],
     locations: ['gym', 'park', 'studio', 'kitchen', 'office'],
@@ -23,7 +23,7 @@ const moodContexts = {
     intensity: 0.8
   },
   peaceful: {
-    primary: ['serene', 'quiet', 'gentle', 'soothing', 'harmonious', 'meditative'],
+    primary: ['serene', 'quiet', 'gentle', 'soothing', 'harmonious', 'meditative', 'peaceful'],
     related: ['mindful', 'still', 'soft', 'calming', 'relaxing', 'contemplative', 'balanced', 'grounded'],
     activities: ['meditating', 'yoga', 'reading', 'journaling', 'painting', 'gardening', 'stargazing'],
     locations: ['garden', 'forest', 'beach', 'mountain', 'lake', 'temple', 'study'],
@@ -33,7 +33,7 @@ const moodContexts = {
     intensity: 0.4
   },
   energetic: {
-    primary: ['dynamic', 'active', 'vibrant', 'spirited', 'enthusiastic', 'powerful'],
+    primary: ['dynamic', 'active', 'vibrant', 'spirited', 'enthusiastic', 'powerful', 'energetic'],
     related: ['strong', 'determined', 'focused', 'driven', 'passionate', 'fierce', 'unstoppable', 'productive'],
     activities: ['working', 'studying', 'coding', 'writing', 'brainstorming', 'creating', 'designing'],
     locations: ['office', 'library', 'cafe', 'desk', 'studio'],
@@ -43,8 +43,8 @@ const moodContexts = {
     intensity: 1.0
   },
   winter: {
-    primary: ['cozy', 'warm', 'snug', 'comfortable', 'hygge', 'intimate'],
-    related: ['peaceful', 'quiet', 'gentle', 'soft', 'calm', 'restful'],
+    primary: ['cozy', 'warm', 'snug', 'comfortable', 'hygge', 'intimate', 'winter'],
+    related: ['peaceful', 'quiet', 'gentle', 'soft', 'calm', 'restful', 'cold', 'chilly'],
     activities: ['drinking cocoa', 'drinking tea', 'reading', 'knitting', 'cuddling', 'watching snow'],
     locations: ['indoors', 'fireplace', 'cabin', 'home', 'blanket fort'],
     timeOfDay: ['evening', 'night', 'early morning'],
@@ -53,8 +53,8 @@ const moodContexts = {
     intensity: 0.7
   },
   rainy: {
-    primary: ['peaceful', 'calm', 'relaxed', 'contemplative', 'cozy'],
-    related: ['quiet', 'gentle', 'soft', 'soothing', 'tranquil'],
+    primary: ['peaceful', 'calm', 'relaxed', 'contemplative', 'cozy', 'rainy'],
+    related: ['quiet', 'gentle', 'soft', 'soothing', 'tranquil', 'wet', 'damp'],
     activities: ['reading', 'writing', 'watching rain', 'napping', 'drinking tea'],
     locations: ['window', 'indoors', 'cafe', 'library', 'bed'],
     timeOfDay: ['morning', 'afternoon', 'evening'],
@@ -63,34 +63,33 @@ const moodContexts = {
     intensity: 0.5
   },
   focus: {
-    primary: ['focused', 'concentrated', 'productive', 'determined', 'efficient'],
-    related: ['studying', 'working', 'learning', 'creating', 'developing'],
+    primary: ['focused', 'concentrated', 'productive', 'determined', 'efficient', 'studious'],
+    related: ['studying', 'working', 'learning', 'creating', 'developing', 'attentive'],
     activities: ['studying', 'working', 'coding', 'writing', 'reading', 'researching'],
     locations: ['library', 'office', 'desk', 'study room', 'cafe'],
     timeOfDay: ['morning', 'afternoon', 'late night'],
     weather: ['clear', 'neutral', 'calm'],
     seasons: ['any'],
     intensity: 0.9
+  },
+  sad: {
+    primary: ['sad', 'melancholic', 'nostalgic', 'emotional', 'reflective', 'sentimental'],
+    related: ['down', 'blue', 'gloomy', 'pensive', 'thoughtful', 'wistful', 'yearning'],
+    activities: ['reflecting', 'thinking', 'remembering', 'writing', 'listening'],
+    locations: ['bedroom', 'quiet place', 'window', 'alone'],
+    timeOfDay: ['night', 'evening', 'late hours'],
+    weather: ['rainy', 'cloudy', 'gloomy', 'misty'],
+    seasons: ['autumn', 'winter'],
+    intensity: 0.6
   }
 } as const;
 
-// Enhanced opposites with context
-const opposites = {
-  chill: ['stressed', 'anxious', 'tense', 'nervous', 'restless', 'rushed', 'busy'],
-  upbeat: ['sad', 'down', 'depressed', 'gloomy', 'negative', 'tired', 'exhausted'],
-  peaceful: ['chaotic', 'noisy', 'turbulent', 'disturbed', 'agitated', 'loud', 'busy'],
-  energetic: ['tired', 'exhausted', 'lazy', 'sluggish', 'fatigued', 'sleepy', 'drained'],
-  winter: ['hot', 'sweaty', 'tropical', 'summery', 'sweltering'],
-  rainy: ['dry', 'arid', 'sunny', 'clear', 'hot'],
-  focus: ['distracted', 'scattered', 'unfocused', 'confused', 'tired']
-};
-
-// Expanded intensifiers with context modifiers
+// Enhanced intensifiers with context modifiers
 const intensifiers = {
   high: ['very', 'super', 'extremely', 'really', 'quite', 'so', 'totally', 'absolutely', 'incredibly'],
   medium: ['pretty', 'rather', 'fairly', 'somewhat', 'kind of', 'sort of'],
   low: ['slightly', 'a bit', 'a little', 'mildly'],
-  negation: ['not', 'don\'t', 'cant', 'cannot', 'won\'t']
+  negation: ['not', 'dont', 'cant', 'cannot', 'won\'t']
 };
 
 // Add sentence patterns for better matching
@@ -252,17 +251,6 @@ function findIntensifiers(input: string): number {
   return hasNegation ? -intensityMultiplier : intensityMultiplier;
 }
 
-function checkForOpposites(input: string, moodType: keyof typeof moodContexts): number {
-  const words = input.toLowerCase().split(/\s+/);
-  const oppositeWords = opposites[moodType];
-  
-  const foundOpposites = words.some(word => 
-    oppositeWords.some(opposite => calculateWordSimilarity(word, opposite) > 0.8)
-  );
-  
-  return foundOpposites ? -0.5 : 0;
-}
-
 function findContextualMatches(input: string, context: typeof moodContexts[keyof typeof moodContexts]): {
   score: number;
   matches: {
@@ -394,7 +382,7 @@ export function matchMoodToRoom(input: string, rooms: Room[]): Room | null {
       context.primary.forEach(keyword => {
         const similarity = calculateWordSimilarity(inputWord, keyword);
         if (similarity > 0.8) {
-          score += similarity * 1.2; // Primary keywords have highest weight
+          score += similarity * 1.5; // Increased weight for primary keywords
           matchedWords.push(keyword);
         }
       });
@@ -403,7 +391,7 @@ export function matchMoodToRoom(input: string, rooms: Room[]): Room | null {
       context.related.forEach(keyword => {
         const similarity = calculateWordSimilarity(inputWord, keyword);
         if (similarity > 0.8) {
-          score += similarity * 0.8; // Related keywords have lower weight
+          score += similarity * 0.8;
           matchedWords.push(keyword);
         }
       });
@@ -419,12 +407,8 @@ export function matchMoodToRoom(input: string, rooms: Room[]): Room | null {
     // Apply intensity multiplier from intensifiers
     score *= Math.abs(intensityMultiplier);
     
-    // Check for opposites and apply penalty if found
-    score += checkForOpposites(normalizedInput, moodType as keyof typeof moodContexts);
-    
-    // If there are negations, check if they apply to this mood
+    // If there are negations, invert the score for this mood
     if (negations.length > 0) {
-      // Check if any of the matched words appear near negations
       const hasNegatedMatch = matchedWords.some(word => {
         const wordIndex = words.indexOf(word);
         return wordIndex !== -1 && negations.some(neg => {
@@ -455,6 +439,53 @@ export function matchMoodToRoom(input: string, rooms: Room[]): Room | null {
     // Get rooms matching the best mood
     const matchingRooms = rooms.filter(room => room.mood === bestMatch.type);
     if (matchingRooms.length > 0) {
+      // Score each matching room based on contextual relevance
+      const roomScores = matchingRooms.map(room => {
+        let roomScore = bestMatch.score;
+
+        // Boost score based on matched context
+        if (bestMatch.contextMatches.weather.length > 0 && room.name.toLowerCase().includes('rain')) {
+          roomScore *= 1.2;
+        }
+        if (bestMatch.contextMatches.timeOfDay.length > 0) {
+          const timeMatches = bestMatch.contextMatches.timeOfDay.some(time => 
+            room.name.toLowerCase().includes(time)
+          );
+          if (timeMatches) roomScore *= 1.2;
+        }
+        if (bestMatch.contextMatches.activities.length > 0) {
+          const activityMatches = bestMatch.contextMatches.activities.some(activity =>
+            room.name.toLowerCase().includes(activity)
+          );
+          if (activityMatches) roomScore *= 1.3;
+        }
+        if (bestMatch.contextMatches.seasons.length > 0) {
+          const seasonMatches = bestMatch.contextMatches.seasons.some(season =>
+            room.name.toLowerCase().includes(season)
+          );
+          if (seasonMatches) roomScore *= 1.4;
+        }
+
+        // Additional name-based scoring
+        const nameWords = room.name.toLowerCase().split(/\s+/);
+        words.forEach(inputWord => {
+          nameWords.forEach(nameWord => {
+            const similarity = calculateWordSimilarity(inputWord, nameWord);
+            if (similarity > 0.8) {
+              roomScore *= 1.5;
+            }
+          });
+        });
+
+        return {
+          room,
+          score: roomScore
+        };
+      });
+
+      // Sort rooms by score and get the best match
+      const bestRoom = roomScores.sort((a, b) => b.score - a.score)[0].room;
+
       // Log the match details for debugging
       console.log('Mood match details:', {
         input: normalizedInput,
@@ -463,10 +494,11 @@ export function matchMoodToRoom(input: string, rooms: Room[]): Room | null {
         matchedWords: bestMatch.matchedWords,
         contextMatches: bestMatch.contextMatches,
         intensityMultiplier,
-        availableRooms: matchingRooms.length
+        availableRooms: matchingRooms.length,
+        selectedRoom: bestRoom.name
       });
       
-      return matchingRooms[Math.floor(Math.random() * matchingRooms.length)];
+      return bestRoom;
     }
   }
   
