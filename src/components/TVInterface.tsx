@@ -35,8 +35,11 @@ export function TVInterface({ room, onChannelChange, allRooms, initialVideos }: 
   const [showChannelNumber, setShowChannelNumber] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [lastTap, setLastTap] = useState(0);
+  const [lastShake, setLastShake] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const router = useRouter();
 
   const {
@@ -44,7 +47,63 @@ export function TVInterface({ room, onChannelChange, allRooms, initialVideos }: 
     handleReady: onPlayerReady,
     handleStateChange: onPlayerStateChange,
     setRoom: setPlayerRoom,
+    togglePlay,
+    playNext,
   } = useYouTubePlayer();
+
+  // Check for mobile screen size
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 640); // sm breakpoint
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Handle shake detection
+  useEffect(() => {
+    if (!isMobile) return;
+
+    let lastX: number | null = null;
+    let lastY: number | null = null;
+    let lastZ: number | null = null;
+    const SHAKE_THRESHOLD = 15;
+    const SHAKE_TIMEOUT = 1000; // ms between shakes
+
+    const handleShake = (event: DeviceMotionEvent) => {
+      const acceleration = event.accelerationIncludingGravity;
+      if (!acceleration || !acceleration.x || !acceleration.y || !acceleration.z) return;
+
+      if (lastX === null) {
+        lastX = acceleration.x;
+        lastY = acceleration.y;
+        lastZ = acceleration.z;
+        return;
+      }
+
+      const deltaX = Math.abs(acceleration.x - lastX);
+      const deltaY = Math.abs(acceleration.y - (lastY ?? 0));
+      const deltaZ = Math.abs(acceleration.z - (lastZ ?? 0));
+
+      if ((deltaX > SHAKE_THRESHOLD && deltaY > SHAKE_THRESHOLD) || 
+          (deltaX > SHAKE_THRESHOLD && deltaZ > SHAKE_THRESHOLD) || 
+          (deltaY > SHAKE_THRESHOLD && deltaZ > SHAKE_THRESHOLD)) {
+        const now = Date.now();
+        if (now - lastShake > SHAKE_TIMEOUT) {
+          playNext();
+          setLastShake(now);
+        }
+      }
+
+      lastX = acceleration.x;
+      lastY = acceleration.y;
+      lastZ = acceleration.z;
+    };
+
+    window.addEventListener('devicemotion', handleShake);
+    return () => window.removeEventListener('devicemotion', handleShake);
+  }, [isMobile, playNext, lastShake]);
 
   // Handle fullscreen changes
   useEffect(() => {
@@ -91,6 +150,36 @@ export function TVInterface({ room, onChannelChange, allRooms, initialVideos }: 
     onPlayerStateChange(event);
   }, [onPlayerStateChange]);
 
+  // Handle double tap for mobile play/pause and room switching
+  const handleDoubleTap = (e: React.MouseEvent) => {
+    const now = Date.now();
+    const DOUBLE_TAP_DELAY = 300; // ms
+    const target = e.currentTarget as HTMLDivElement;
+    const rect = target.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const edgeThreshold = rect.width * 0.2; // 20% of width for edge detection
+    
+    if (lastTap && (now - lastTap) < DOUBLE_TAP_DELAY) {
+      if (x < edgeThreshold) {
+        // Double tap on left edge
+        const currentIndex = allRooms.findIndex(r => r.id === room.id);
+        const prevIndex = currentIndex > 0 ? currentIndex - 1 : allRooms.length - 1;
+        handleChannelChange(allRooms[prevIndex]);
+      } else if (x > rect.width - edgeThreshold) {
+        // Double tap on right edge
+        const currentIndex = allRooms.findIndex(r => r.id === room.id);
+        const nextIndex = currentIndex < allRooms.length - 1 ? currentIndex + 1 : 0;
+        handleChannelChange(allRooms[nextIndex]);
+      } else {
+        // Double tap in center
+        togglePlay();
+      }
+      setLastTap(0);
+    } else {
+      setLastTap(now);
+    }
+  };
+
   const handleChannelChange = useCallback(async (newRoom: Room) => {
     if (isLoading || newRoom.id === room.id) return;
     
@@ -128,10 +217,11 @@ export function TVInterface({ room, onChannelChange, allRooms, initialVideos }: 
           {/* Main TV Screen */}
           <div className="absolute inset-0">
             {/* CRT and Scanline Effects */}
-            <div className="absolute inset-0 pointer-events-none bg-crt z-30" />
-            <div className="absolute inset-0 pointer-events-none bg-scanlines opacity-30 z-30" />
+            {/* <div className="absolute inset-0 pointer-events-none bg-crt z-30" />
+            <div className="absolute inset-0 pointer-events-none bg-scanlines opacity-30 z-30" /> */}
             <div className="absolute inset-0 overflow-hidden">
               <div className="absolute inset-0 animate-scanline z-30" />
+              <div className="bg-scanlines" />
             </div>
 
             {/* Channel Number */}
@@ -172,10 +262,11 @@ export function TVInterface({ room, onChannelChange, allRooms, initialVideos }: 
                     iframeClassName="w-full h-full pointer-events-none !bg-black"
                     style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
                   />
-                  {/* Overlay to prevent YouTube UI from showing */}
+                  {/* Overlay to prevent YouTube UI from showing and handle double tap */}
                   <div 
                     className="absolute inset-0 z-10 bg-black/10" 
                     onContextMenu={(e) => e.preventDefault()}
+                    onClick={handleDoubleTap}
                   />
                 </div>
               )}
@@ -298,9 +389,9 @@ export function TVInterface({ room, onChannelChange, allRooms, initialVideos }: 
             {/* Room Info - Dialog Trigger */}
             <Dialog.Trigger asChild>
               <button 
-                className="fixed z-[101] bottom-28 sm:bottom-2 left-4 flex items-center gap-4 p-3 rounded-lg 
+                className="fixed z-[101] bottom-[10rem] sm:bottom-4 left-4 flex items-center gap-4 p-3 rounded-lg 
                           bg-black/0 backdrop-blur-sm hover:bg-black/60 transition-colors
-                          focus:outline-none focus:ring-2 focus:ring-white/20"
+                          focus:outline-none focus:ring-0 focus:ring-white/20"
                 onClick={(e) => e.stopPropagation()}
                 aria-label={`Current room: ${room.name}`}
               >

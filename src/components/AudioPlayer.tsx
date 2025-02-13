@@ -34,7 +34,7 @@ export default function AudioPlayer({ room }: AudioPlayerProps) {
   }, [playerState.currentTime, playerState.duration]);
 
   return (
-    <div className="fixed z-[100] bottom-0 left-0 right-0 bg-white/10 dark:bg-gray-900/10 backdrop-blur-md border-t border-gray-200/0 dark:border-gray-800/0 p-2 sm:p-4">
+    <div className="fixed z-[100] bottom-0 left-0 right-0 bg-white dark:bg-gray-900 backdrop-blur-md border-t border-gray-200/0 dark:border-gray-800/0 p-2 sm:p-6">
       <div className="container mx-auto">
         {/* Mobile Layout (stacked) */}
         <div className="block sm:hidden">

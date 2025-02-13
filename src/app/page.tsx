@@ -223,11 +223,8 @@ export default function Home() {
       </div>
 
       {/* CRT and Scanline Effects */}
-      <div className="fixed inset-0 pointer-events-none bg-crt z-30" />
-      <div className="fixed inset-0 pointer-events-none bg-scanlines opacity-50 z-30" />
-      <div className="fixed inset-0 overflow-hidden">
-        <div className="absolute inset-0 animate-scanline z-30" />
-      </div>
+      <div className="fixed inset-0 pointer-events-none bg-crt z-10" />
+      <div className="bg-scanlines" />
 
       {/* Content */}
       <div className="relative z-40 min-h-[100dvh]">

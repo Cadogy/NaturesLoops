@@ -90,29 +90,45 @@
   }
 }
 
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+}
+
 /* CRT Effect */
 .bg-crt {
   background: radial-gradient(
-    ellipse at center,
-    transparent 0%,
-    rgba(0, 0, 0, 0.2) 80%,
-    rgba(0, 0, 0, 0.4) 100%
+    ellipse,
+    rgba(11, 18, 28, 0.95) 0%,
+    rgba(11, 18, 28, 0.85) 120%
   );
-  box-shadow: inset 0 0 150px rgba(0, 0, 0, 0.5);
-  pointer-events: none;
 }
 
 /* Static Scanlines */
 .bg-scanlines {
-  background: repeating-linear-gradient(
-    to bottom,
-    transparent,
-    transparent 1px,
-    rgba(255, 255, 255, 0.03) 2px,
-    rgba(255, 255, 255, 0.03) 3px
-  );
-  background-size: 100% 4px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url(/images/lines.jpg);
+  background-size: 7px auto;
+  mix-blend-mode: overlay;
   pointer-events: none;
+  opacity: 0.15;
+  animation: moveDownAnimation 150s linear infinite;
+  z-index: 20;
+}
+
+@keyframes moveDownAnimation {
+  100% {
+    background-position-y: 100%;
+  }
 }
 
 /* Animated Scanline */
