@@ -8,36 +8,22 @@ import { AboutDialog } from '../components/AboutDialog';
 import { motion } from 'framer-motion';
 import { matchMoodToRoom } from '../utils/moodMatcher';
 
-// Expanded suggestion pools - we'll randomly select from these on each load
-const suggestionPools = {
-  feelings: [
-    'relaxed', 'focused', 'energetic', 'peaceful', 'cozy',
-    'motivated', 'calm', 'tranquil', 'inspired', 'creative',
-    'happy', 'serene', 'balanced', 'mindful', 'zen',
-    'productive', 'cheerful', 'mellow', 'content', 'harmonious'
-  ] as string[],
-  activities: [
-    'studying', 'coding', 'reading', 'meditating',
-    'writing', 'working', 'brainstorming', 'designing',
-    'learning', 'researching', 'creating', 'planning',
-    'journaling', 'drawing', 'thinking', 'developing'
-  ] as string[],
-  weather: [
-    'rainy day', 'snowy evening', 'sunny morning',
-    'foggy afternoon', 'stormy night', 'misty dawn',
-    'winter vibes', 'autumn breeze', 'spring morning',
-    'cozy winter', 'gentle rain', 'thunder outside'
-  ] as string[],
-  situations: [
-    'drinking tea', 'late night work', 'morning coffee',
-    'by the fireplace', 'watching rain', 'early sunrise',
-    'sunset vibes', 'midnight focus', 'weekend study',
-    'coffee shop work', 'library session', 'home office'
-  ] as string[]
-};
+// Combined suggestion pool
+const suggestionPool = [
+  // Feelings
+  'relaxed', 'focused', 'energetic', 'peaceful', 'cozy',
+  'motivated', 'calm', 'tranquil', 'inspired', 'creative',
+  // Activities
+  'studying', 'coding', 'reading', 'meditating', 'working',
+  'writing', 'brainstorming', 'designing', 'creating',
+  // Weather & Situations
+  'rainy day', 'snowy evening', 'sunny morning', 'foggy afternoon',
+  'drinking tea', 'late night work', 'morning coffee', 'by the fireplace',
+  'watching rain', 'sunset vibes', 'midnight focus'
+] as const;
 
 // Function to get random items from an array
-function getRandomItems(array: string[], count: number): string[] {
+function getRandomItems(array: readonly string[], count: number): string[] {
   const shuffled = [...array].sort(() => 0.5 - Math.random());
   return shuffled.slice(0, count);
 }
@@ -70,25 +56,6 @@ function SuggestionPill({
   );
 }
 
-// Adjust the number of suggestions based on screen size
-function getResponsiveSuggestionCount(category: string, isMobile: boolean): number {
-  if (isMobile) {
-    switch (category) {
-      case 'feelings': return 4;
-      case 'activities': return 3;
-      case 'weather': return 2;
-      case 'situations': return 2;
-      default: return 2;
-    }
-  }
-  return {
-    feelings: 6,
-    activities: 5,
-    weather: 4,
-    situations: 4
-  }[category] || 4;
-}
-
 export default function Home() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
@@ -99,7 +66,7 @@ export default function Home() {
   const [moodInputValue, setMoodInputValue] = useState('');
   const [searchingMessage, setSearchingMessage] = useState('');
   const [selectedSuggestion, setSelectedSuggestion] = useState<string | null>(null);
-  const [suggestions, setSuggestions] = useState<Record<string, string[]>>({});
+  const [suggestions, setSuggestions] = useState<string[]>([]);
   const [isMobile, setIsMobile] = useState(false);
   const [totalActiveUsers, setTotalActiveUsers] = useState(0);
 
@@ -160,14 +127,10 @@ export default function Home() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Initialize suggestions with responsive counts
+  // Initialize suggestions with responsive count
   useEffect(() => {
-    const initialSuggestions = {
-      feelings: getRandomItems(suggestionPools.feelings, getResponsiveSuggestionCount('feelings', isMobile)),
-      activities: getRandomItems(suggestionPools.activities, getResponsiveSuggestionCount('activities', isMobile)),
-      weather: getRandomItems(suggestionPools.weather, getResponsiveSuggestionCount('weather', isMobile)),
-      situations: getRandomItems(suggestionPools.situations, getResponsiveSuggestionCount('situations', isMobile))
-    };
+    const suggestionsCount = isMobile ? 8 : 12;
+    const initialSuggestions = getRandomItems(suggestionPool, suggestionsCount);
     setSuggestions(initialSuggestions);
   }, [isMobile]);
 
@@ -315,27 +278,20 @@ export default function Home() {
 
                     {/* Mood suggestions */}
                     {!isTeleporting && !searchingMessage && (
-                      <div className="space-y-3">
-                        {Object.entries(suggestions).map(([category, items]) => (
-                          <div key={category} className="space-y-1.5">
-                            <h3 className="text-white/50 text-xs font-mono uppercase tracking-wider pl-1">
-                              {category}
-                            </h3>
-                            <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                              {items.map((suggestion) => (
-                                <SuggestionPill
-                                  key={suggestion}
-                                  suggestion={suggestion}
-                                  isSelected={selectedSuggestion === suggestion}
-                                  onClick={() => {
-                                    setMoodInputValue(suggestion);
-                                    setSelectedSuggestion(suggestion);
-                                  }}
-                                />
-                              ))}
-                            </div>
-                          </div>
-                        ))}
+                      <div className="space-y-2">
+                        <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                          {suggestions.map((suggestion) => (
+                            <SuggestionPill
+                              key={suggestion}
+                              suggestion={suggestion}
+                              isSelected={selectedSuggestion === suggestion}
+                              onClick={() => {
+                                setMoodInputValue(suggestion);
+                                setSelectedSuggestion(suggestion);
+                              }}
+                            />
+                          ))}
+                        </div>
                       </div>
                     )}
                   </div>
