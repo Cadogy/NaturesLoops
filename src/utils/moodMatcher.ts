@@ -81,6 +81,16 @@ const moodContexts = {
     weather: ['rainy', 'cloudy', 'gloomy', 'misty'],
     seasons: ['autumn', 'winter'],
     intensity: 0.6
+  },
+  autumn: {
+    primary: ['autumn', 'fall', 'harvest', 'pumpkin', 'cozy', 'crisp'],
+    related: ['golden', 'leaves', 'amber', 'rustic', 'warm', 'earthy', 'mellow'],
+    activities: ['reading', 'walking', 'drinking tea', 'baking', 'studying', 'reflecting'],
+    locations: ['porch', 'garden', 'park', 'cafe', 'library', 'home'],
+    timeOfDay: ['morning', 'afternoon', 'evening', 'dusk'],
+    weather: ['crisp', 'cool', 'breezy', 'cloudy', 'misty'],
+    seasons: ['autumn', 'fall'],
+    intensity: 0.7
   }
 } as const;
 
@@ -120,20 +130,29 @@ const sentencePatterns = {
     'working on {project}',
     '{work} session',
     'deep {work}'
+  ],
+  autumn: [
+    'fall {time}',
+    'autumn {activity}',
+    'pumpkin {drink}',
+    'harvest {time}',
+    'falling leaves',
+    'cozy autumn'
   ]
 } as const;
 
 // Add common word replacements for pattern matching
 const wordReplacements = {
-  drink: ['cocoa', 'chocolate', 'tea', 'coffee'],
-  time: ['morning', 'afternoon', 'evening', 'night', 'day'],
-  activity: ['vibes', 'mood', 'feeling', 'day'],
+  drink: ['cocoa', 'chocolate', 'tea', 'coffee', 'cider', 'latte', 'spice'],
+  time: ['morning', 'afternoon', 'evening', 'night', 'day', 'season', 'vibes'],
+  activity: ['vibes', 'mood', 'feeling', 'day', 'study', 'reading', 'walk'],
   item: ['blanket', 'sweater', 'scarf'],
   location: ['inside', 'indoors', 'home', 'room'],
   weather: ['rain', 'storm', 'thunder'],
   action: ['ing', 'y', ''],
   work: ['study', 'work', 'focus', 'concentrate', 'research', 'code', 'write'],
-  project: ['homework', 'project', 'assignment', 'paper', 'code', 'thesis']
+  project: ['homework', 'project', 'assignment', 'paper', 'code', 'thesis'],
+  season: ['spring', 'summer', 'autumn', 'fall']
 } as const;
 
 // Add common phrases that indicate mood
@@ -183,6 +202,21 @@ interface MoodScore {
     timeOfDay: string[];
     seasons: string[];
   };
+}
+
+// Add interface for YouTube API response
+interface YouTubePlaylistItem {
+  snippet: {
+    title: string;
+    description: string;
+    resourceId: {
+      videoId: string;
+    };
+  };
+}
+
+interface YouTubePlaylistResponse {
+  items: YouTubePlaylistItem[];
 }
 
 function calculateWordSimilarity(word1: string, word2: string): number {
@@ -353,7 +387,7 @@ function findNegations(input: string): string[] {
   return words.filter(word => negationWords.includes(word));
 }
 
-export function matchMoodToRoom(input: string, rooms: Room[]): Room | null {
+export async function matchMoodToRoom(input: string, rooms: Room[]): Promise<Room | null> {
   const normalizedInput = input.toLowerCase().trim();
   const words = normalizedInput.split(/\s+/);
   const intensityMultiplier = findIntensifiers(normalizedInput);
@@ -440,53 +474,157 @@ export function matchMoodToRoom(input: string, rooms: Room[]): Room | null {
     const matchingRooms = rooms.filter(room => room.mood === bestMatch.type);
     if (matchingRooms.length > 0) {
       // Score each matching room based on contextual relevance
-      const roomScores = matchingRooms.map(room => {
+      const roomScores = await Promise.all(matchingRooms.map(async room => {
         let roomScore = bestMatch.score;
+        const roomNameLower = room.name.toLowerCase();
+        const playlistIdLower = room.playlistId?.toLowerCase() || '';
+        
+        // Helper function to check word matches in a string
+        const checkWordMatches = (text: string, multiplier: number) => {
+          const textWords = text.split(/\s+/);
+          words.forEach(inputWord => {
+            textWords.forEach(textWord => {
+              const similarity = calculateWordSimilarity(inputWord, textWord);
+              if (similarity > 0.8) {
+                roomScore *= multiplier;
+              }
+            });
+          });
+        };
 
-        // Boost score based on matched context
-        if (bestMatch.contextMatches.weather.length > 0 && room.name.toLowerCase().includes('rain')) {
-          roomScore *= 1.2;
+        // Try to get playlist track titles for additional context
+        try {
+          const response = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=${room.playlistId}&key=${process.env.YOUTUBE_API_KEY}`);
+          if (response.ok) {
+            const data = await response.json() as YouTubePlaylistResponse;
+            const trackTitles = data.items.map(item => item.snippet.title.toLowerCase());
+            
+            // Check track titles for mood-specific keywords
+            trackTitles.forEach((title: string) => {
+              // Check primary keywords
+              moodContexts[bestMatch.type].primary.forEach(keyword => {
+                if (title.includes(keyword.toLowerCase())) {
+                  roomScore *= 1.4; // High boost for primary keyword in track title
+                }
+              });
+
+              // Check related keywords
+              moodContexts[bestMatch.type].related.forEach(keyword => {
+                if (title.includes(keyword.toLowerCase())) {
+                  roomScore *= 1.2; // Medium boost for related keyword in track title
+                }
+              });
+
+              // Check seasonal terms
+              moodContexts[bestMatch.type].seasons.forEach(season => {
+                if (title.includes(season.toLowerCase())) {
+                  roomScore *= 1.3; // Good boost for seasonal match in track title
+                }
+              });
+
+              // Check weather terms
+              moodContexts[bestMatch.type].weather.forEach(weather => {
+                if (title.includes(weather.toLowerCase())) {
+                  roomScore *= 1.25; // Weather context boost in track title
+                }
+              });
+
+              // Direct word matches in track titles
+              checkWordMatches(title, 1.35);
+            });
+          }
+        } catch (error) {
+          console.warn('Could not fetch playlist items:', error);
         }
+
+        // Boost score based on matched context in room name and playlist ID
+        if (bestMatch.contextMatches.weather.length > 0) {
+          const weatherMatches = bestMatch.contextMatches.weather.some(weather => 
+            roomNameLower.includes(weather) || playlistIdLower.includes(weather)
+          );
+          if (weatherMatches) roomScore *= 1.2;
+        }
+
         if (bestMatch.contextMatches.timeOfDay.length > 0) {
           const timeMatches = bestMatch.contextMatches.timeOfDay.some(time => 
-            room.name.toLowerCase().includes(time)
+            roomNameLower.includes(time) || playlistIdLower.includes(time)
           );
           if (timeMatches) roomScore *= 1.2;
         }
+
         if (bestMatch.contextMatches.activities.length > 0) {
           const activityMatches = bestMatch.contextMatches.activities.some(activity =>
-            room.name.toLowerCase().includes(activity)
+            roomNameLower.includes(activity) || playlistIdLower.includes(activity)
           );
           if (activityMatches) roomScore *= 1.3;
         }
+
         if (bestMatch.contextMatches.seasons.length > 0) {
           const seasonMatches = bestMatch.contextMatches.seasons.some(season =>
-            room.name.toLowerCase().includes(season)
+            roomNameLower.includes(season) || playlistIdLower.includes(season)
           );
           if (seasonMatches) roomScore *= 1.4;
         }
 
-        // Additional name-based scoring
-        const nameWords = room.name.toLowerCase().split(/\s+/);
-        words.forEach(inputWord => {
-          nameWords.forEach(nameWord => {
-            const similarity = calculateWordSimilarity(inputWord, nameWord);
-            if (similarity > 0.8) {
-              roomScore *= 1.5;
+        // Check for mood-specific keywords in playlist ID
+        const moodContext = moodContexts[bestMatch.type];
+        const playlistHasPrimaryKeywords = moodContext.primary.some(keyword =>
+          playlistIdLower.includes(keyword)
+        );
+        if (playlistHasPrimaryKeywords) roomScore *= 1.3;
+
+        const playlistHasRelatedKeywords = moodContext.related.some(keyword =>
+          playlistIdLower.includes(keyword)
+        );
+        if (playlistHasRelatedKeywords) roomScore *= 1.2;
+
+        // Score matches in room name (higher weight)
+        checkWordMatches(roomNameLower, 1.5);
+        
+        // Score matches in playlist ID (medium weight)
+        if (playlistIdLower) {
+          checkWordMatches(playlistIdLower, 1.3);
+        }
+
+        // Additional context scoring from playlist ID
+        if (playlistIdLower) {
+          // Check for study/work context
+          if (input.includes('study') || input.includes('work')) {
+            if (playlistIdLower.includes('study') || playlistIdLower.includes('work')) {
+              roomScore *= 1.4;
+            }
+          }
+
+          // Check for time of day context
+          ['morning', 'afternoon', 'evening', 'night'].forEach(time => {
+            if (input.includes(time) && playlistIdLower.includes(time)) {
+              roomScore *= 1.3;
             }
           });
-        });
+
+          // Check for weather context
+          ['rain', 'snow', 'storm', 'sunny', 'cloudy'].forEach(weather => {
+            if (input.includes(weather) && playlistIdLower.includes(weather)) {
+              roomScore *= 1.3;
+            }
+          });
+        }
 
         return {
           room,
-          score: roomScore
+          score: roomScore,
+          debug: {
+            roomName: room.name,
+            playlistId: room.playlistId,
+            finalScore: roomScore
+          }
         };
-      });
+      }));
 
       // Sort rooms by score and get the best match
       const bestRoom = roomScores.sort((a, b) => b.score - a.score)[0].room;
 
-      // Log the match details for debugging
+      // Enhanced debug logging
       console.log('Mood match details:', {
         input: normalizedInput,
         matchedMood: bestMatch.type,
@@ -495,7 +633,9 @@ export function matchMoodToRoom(input: string, rooms: Room[]): Room | null {
         contextMatches: bestMatch.contextMatches,
         intensityMultiplier,
         availableRooms: matchingRooms.length,
-        selectedRoom: bestRoom.name
+        selectedRoom: bestRoom.name,
+        playlistId: bestRoom.playlistId,
+        allRoomScores: roomScores.map(rs => rs.debug)
       });
       
       return bestRoom;

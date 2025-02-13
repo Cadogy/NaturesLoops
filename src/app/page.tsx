@@ -161,7 +161,7 @@ export default function Home() {
       // Try to match the mood to a room
       setSearchingMessage('Finding the perfect room for you...');
       await new Promise(resolve => setTimeout(resolve, 1000));
-      const matchedRoom = matchMoodToRoom(moodInputValue, rooms);
+      const matchedRoom = await matchMoodToRoom(moodInputValue, rooms);
       
       if (matchedRoom) {
         setSearchingMessage(`Perfect match! Taking you to ${matchedRoom.name}...`);
