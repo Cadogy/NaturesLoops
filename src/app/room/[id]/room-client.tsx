@@ -23,36 +23,43 @@ export default function RoomClient({ initialRoom, allRooms }: RoomClientProps) {
   // Track user presence in room
   useEffect(() => {
     // Add user to room
-    const addUserToRoom = () => {
+    const addUserToRoom = async () => {
       try {
-        const roomsData = JSON.parse(localStorage.getItem('activeRooms') || '{}');
-        roomsData[initialRoom.id] = (roomsData[initialRoom.id] || 0) + 1;
-        localStorage.setItem('activeRooms', JSON.stringify(roomsData));
-        // Dispatch storage event for other tabs
-        window.dispatchEvent(new StorageEvent('storage', {
-          key: 'activeRooms',
-          newValue: JSON.stringify(roomsData)
-        }));
+        const response = await fetch('/api/active-users', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            roomId: initialRoom.id,
+            increment: 1
+          })
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to update active users');
+        }
       } catch (error) {
         console.error('Error adding user to room:', error);
       }
     };
 
     // Remove user from room
-    const removeUserFromRoom = () => {
+    const removeUserFromRoom = async () => {
       try {
-        const roomsData = JSON.parse(localStorage.getItem('activeRooms') || '{}');
-        if (roomsData[initialRoom.id] > 0) {
-          roomsData[initialRoom.id]--;
-          if (roomsData[initialRoom.id] === 0) {
-            delete roomsData[initialRoom.id];
-          }
-          localStorage.setItem('activeRooms', JSON.stringify(roomsData));
-          // Dispatch storage event for other tabs
-          window.dispatchEvent(new StorageEvent('storage', {
-            key: 'activeRooms',
-            newValue: JSON.stringify(roomsData)
-          }));
+        const response = await fetch('/api/active-users', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            roomId: initialRoom.id,
+            increment: -1
+          })
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to update active users');
         }
       } catch (error) {
         console.error('Error removing user from room:', error);

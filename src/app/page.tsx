@@ -104,39 +104,28 @@ export default function Home() {
   const [totalActiveUsers, setTotalActiveUsers] = useState(0);
 
   // Function to get active users count
-  const updateActiveUsers = useCallback(() => {
+  const updateActiveUsers = useCallback(async () => {
     try {
-      const roomsData: Record<string, number> = JSON.parse(localStorage.getItem('activeRooms') || '{}');
-      const total = Object.values(roomsData).reduce((sum, count) => sum + count, 0);
-      setTotalActiveUsers(total);
+      const response = await fetch('/api/active-users');
+      if (!response.ok) {
+        throw new Error('Failed to fetch active users');
+      }
+      const data = await response.json();
+      setTotalActiveUsers(data.total);
     } catch (error) {
       console.error('Error updating active users:', error);
     }
   }, []);
 
-  // Update active users count periodically and listen for storage changes
+  // Update active users count periodically
   useEffect(() => {
     // Initial update
     updateActiveUsers();
 
-    // Listen for storage changes
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'activeRooms') {
-        updateActiveUsers();
-      }
-    };
+    // Set up polling interval
+    const interval = setInterval(updateActiveUsers, 5000); // Update every 5 seconds
 
-    // Add storage event listener
-    window.addEventListener('storage', handleStorageChange);
-
-    // Periodic update as backup
-    const interval = setInterval(updateActiveUsers, 5000);
-
-    // Cleanup
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      clearInterval(interval);
-    };
+    return () => clearInterval(interval);
   }, [updateActiveUsers]);
 
   // Initialize rooms from YouTube playlists
