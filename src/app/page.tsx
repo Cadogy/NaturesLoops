@@ -194,7 +194,7 @@ export default function Home() {
         {/* Hero Section with Mood Matcher */}
         <div className="min-h-[100dvh] flex items-center justify-center py-6 sm:py-24">
           <div className="container mx-auto px-4 sm:px-6 text-center">
-            <div className="backdrop-blur-md border border-white/20 rounded-xl p-6 sm:p-10">
+            <div className="backdrop-blur-md border border-white/10 rounded-xl p-6 sm:p-10">
               <div className="max-w-2xl mx-auto">
                 <h1 className="font-poppins text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2 sm:mb-3">
                   Nature&apos;s Loops
@@ -249,7 +249,7 @@ export default function Home() {
                             setSelectedSuggestion(null);
                           }}
                           placeholder={isMobile ? "How are you feeling?" : "e.g., relaxed, energetic, peaceful..."}
-                          className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-white/5 border border-white/20 rounded-lg 
+                          className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-white/5 border border-white/10 rounded-lg 
                                    text-white placeholder-white/50 focus:outline-none focus:ring-2 
                                    focus:ring-primary transition-all text-sm sm:text-base"
                           disabled={isTeleporting}
@@ -322,7 +322,7 @@ export default function Home() {
         {/* Mission Section */}
         <section className="relative py-6 sm:py-24">
           <div className="container mx-auto px-4 sm:px-6">
-            <div className="backdrop-blur-md border border-white/20 rounded-xl p-6 sm:p-10">
+            <div className="backdrop-blur-md border border-white/10 rounded-xl p-6 sm:p-10">
               <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6 font-poppins">Our Musical Mission</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div className="space-y-4">
@@ -351,7 +351,7 @@ export default function Home() {
         {/* Features Section */}
         <section className="relative py-6 sm:py-24">
           <div className="container mx-auto px-4 sm:px-6">
-            <div className="backdrop-blur-md border border-white/20 rounded-xl p-6 sm:p-10">
+            <div className="backdrop-blur-md border border-white/10 rounded-xl p-6 sm:p-10">
               <h2 className="text-3xl sm:text-4xl font-bold text-white mb-10 font-poppins">Why Nature&apos;s Loops?</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                 {[
@@ -390,7 +390,7 @@ export default function Home() {
         {/* YouTube Channel Showcase */}
         <section className="relative py-6 sm:py-24">
           <div className="container mx-auto px-4 sm:px-6">
-            <div className="backdrop-blur-md border border-white/20 rounded-xl p-6 sm:p-10">
+            <div className="backdrop-blur-md border border-white/10 rounded-xl p-6 sm:p-10">
               <div className="flex flex-col md:flex-row items-center gap-8">
                 <div className="flex-1 space-y-6">
                   <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4 font-poppins">Join Our Community</h2>
@@ -422,7 +422,7 @@ export default function Home() {
                   </div>
                 </div>
                 <div className="flex-1">
-                  <div className="aspect-video rounded-lg overflow-hidden border-2 border-white/20">
+                  <div className="aspect-video rounded-lg overflow-hidden border-2 border-white/10">
                     <iframe
                       width="100%"
                       height="100%"
@@ -442,7 +442,7 @@ export default function Home() {
         {/* Community Stats */}
         <section className="relative py-16 sm:py-24">
           <div className="container mx-auto px-4 sm:px-6">
-            <div className="backdrop-blur-md border border-white/20 rounded-xl p-6 sm:p-10">
+            <div className="backdrop-blur-md border border-white/10 rounded-xl p-6 sm:p-10">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
                 {[
                   { 

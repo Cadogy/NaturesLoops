@@ -4,27 +4,19 @@ import { ActiveUsers } from '@/models/ActiveUsers';
 
 export const dynamic = 'force-dynamic';
 
-// Cleanup stale sessions (older than 5 minutes)
-async function cleanupStaleSessions() {
-  try {
-    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
-    await ActiveUsers.deleteMany({
-      lastUpdated: { $lt: fiveMinutesAgo }
-    });
-  } catch (error) {
-    console.error('Error cleaning up stale sessions:', error);
-  }
-}
-
 // GET total active users
 export async function GET() {
   try {
     await connectDB();
     
-    // Clean up stale sessions before counting
-    await cleanupStaleSessions();
-    
     const activeUsers = await ActiveUsers.aggregate([
+      {
+        $match: {
+          lastUpdated: { 
+            $gte: new Date(Date.now() - 5 * 60 * 1000) 
+          }
+        }
+      },
       {
         $group: {
           _id: null,
@@ -52,6 +44,10 @@ export async function POST(request: Request) {
   try {
     const { roomId, increment, sessionId } = await request.json();
     
+    // Get headers from the request object
+    const userAgent = request.headers.get('user-agent') || 'unknown';
+    const ip = request.headers.get('x-real-ip') || request.headers.get('x-forwarded-for') || 'unknown';
+    
     if (!roomId || typeof increment !== 'number' || !sessionId) {
       return NextResponse.json(
         { error: 'Invalid request body. Required: roomId, increment, sessionId' },
@@ -61,28 +57,51 @@ export async function POST(request: Request) {
 
     await connectDB();
 
-    // Clean up stale sessions
-    await cleanupStaleSessions();
-
-    // Update or create the room count with session tracking
-    const result = await ActiveUsers.findOneAndUpdate(
-      { roomId, sessionId },
-      {
-        $inc: { count: increment },
-        $set: { 
-          lastUpdated: new Date(),
-          sessionId: sessionId
+    // For new sessions or heartbeats
+    if (increment >= 0) {
+      const result = await ActiveUsers.findOneAndUpdate(
+        { roomId, sessionId },
+        {
+          $inc: { count: increment },
+          $set: { 
+            lastUpdated: new Date(),
+            userAgent,
+            ipAddress: ip
+          }
+        },
+        {
+          new: true,
+          upsert: true
         }
-      },
-      {
-        new: true,
-        upsert: true
-      }
-    );
+      );
 
-    // If count is 0 or negative, remove the record
-    if (result.count <= 0) {
-      await ActiveUsers.deleteOne({ roomId, sessionId });
+      // Verify the update was successful
+      if (!result) {
+        throw new Error('Failed to update session');
+      }
+
+      console.log(`Session ${sessionId} updated: count=${result.count}`);
+    } else {
+      // For decrements, ensure we don't go below 0
+      const session = await ActiveUsers.findOne({ roomId, sessionId });
+      if (session) {
+        const newCount = Math.max(0, session.count + increment);
+        if (newCount === 0) {
+          await ActiveUsers.deleteOne({ roomId, sessionId });
+          console.log(`Session ${sessionId} removed due to zero count`);
+        } else {
+          await ActiveUsers.updateOne(
+            { roomId, sessionId },
+            {
+              $set: { 
+                count: newCount,
+                lastUpdated: new Date()
+              }
+            }
+          );
+          console.log(`Session ${sessionId} decremented: count=${newCount}`);
+        }
+      }
     }
 
     // Get new total across all valid sessions
@@ -132,10 +151,10 @@ export async function DELETE(request: Request) {
     await connectDB();
 
     // Remove the specific session
-    await ActiveUsers.deleteOne({ roomId, sessionId });
-
-    // Clean up any other stale sessions
-    await cleanupStaleSessions();
+    const result = await ActiveUsers.deleteOne({ roomId, sessionId });
+    if (result.deletedCount > 0) {
+      console.log(`Deleted session: ${sessionId} from room: ${roomId}`);
+    }
 
     // Get updated total
     const activeUsers = await ActiveUsers.aggregate([
