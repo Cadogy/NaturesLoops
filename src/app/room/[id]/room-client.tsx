@@ -314,13 +314,7 @@ export default function RoomClient({ initialRoom, allRooms }: RoomClientProps) {
 
   return (
     <div className="min-h-screen bg-black">
-      <TVInterface
-        room={initialRoom}
-        onChannelChange={handleChannelChange}
-        allRooms={allRooms}
-        initialVideos={videos}
-      />
-      {/* Static Effect */}
+      {/* Static Effect - Place it first so it's behind everything */}
       <TVStatic isVisible={showStatic} onAnimationComplete={handleStaticComplete} />
       {/* Channel Number */}
       {showStatic && nextRoom && (
@@ -328,6 +322,12 @@ export default function RoomClient({ initialRoom, allRooms }: RoomClientProps) {
           CH {nextRoom.channelNumber}
         </div>
       )}
+      <TVInterface
+        room={initialRoom}
+        onChannelChange={handleChannelChange}
+        allRooms={allRooms}
+        initialVideos={videos}
+      />
       {/* Footer */}
       <div className="fixed bottom-[6.3rem] sm:bottom-[5.8rem] bg-white dark:bg-gray-900/0 backdrop-blur-lg p-4 left-0 right-0 text-center z-50">
         <p className="text-white/40 text-[10px] sm:text-xs md:text-sm font-mono px-2 sm:px-4">

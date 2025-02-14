@@ -62,7 +62,13 @@ export function TVStatic({ isVisible, onAnimationComplete }: TVStaticProps) {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
           onAnimationComplete={onAnimationComplete}
-          className="fixed inset-0 z-[60] bg-black pointer-events-none"
+          className={`
+            fixed inset-0 
+            pointer-events-none 
+            z-[40]
+            ${isVisible ? 'opacity-100' : 'opacity-0'} 
+            transition-opacity duration-300
+          `}
         >
           <img
             src={selectedGif}
