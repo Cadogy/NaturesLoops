@@ -5,10 +5,13 @@ const activeUsersSchema = new mongoose.Schema({
   roomId: { type: String, required: true },
   sessionId: { type: String, required: true },
   count: { type: Number, default: 1, min: 0 },
-  lastUpdated: { type: Date, default: Date.now }, // Remove expires from here
+  lastUpdated: { type: Date, default: Date.now },
   userAgent: { type: String },
   ipAddress: { type: String }
 });
+
+// Remove any existing indexes to prevent conflicts
+activeUsersSchema.index({ roomId: 1 }, { unique: false });
 
 // Create compound index for roomId and sessionId
 activeUsersSchema.index({ roomId: 1, sessionId: 1 }, { unique: true });
@@ -25,4 +28,22 @@ activeUsersSchema.pre('save', function(next) {
 });
 
 // Export the model
-export const ActiveUsers = mongoose.models.ActiveUsers || mongoose.model('ActiveUsers', activeUsersSchema); 
+const ActiveUsers = mongoose.models.ActiveUsers || mongoose.model('ActiveUsers', activeUsersSchema);
+
+// Drop existing indexes and recreate them
+async function ensureIndexes() {
+  try {
+    if (mongoose.connection.readyState === 1) { // If connected
+      await ActiveUsers.collection.dropIndexes();
+      await ActiveUsers.syncIndexes();
+      console.log('ActiveUsers indexes recreated successfully');
+    }
+  } catch (error) {
+    console.error('Error recreating indexes:', error);
+  }
+}
+
+// Call ensureIndexes when the model is first created
+ensureIndexes();
+
+export { ActiveUsers }; 

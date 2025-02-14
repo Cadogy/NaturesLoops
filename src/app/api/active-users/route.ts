@@ -62,12 +62,12 @@ export async function POST(request: Request) {
       const result = await ActiveUsers.findOneAndUpdate(
         { roomId, sessionId },
         {
-          $inc: { count: increment },
           $set: { 
             lastUpdated: new Date(),
             userAgent,
             ipAddress: ip
-          }
+          },
+          $setOnInsert: { count: increment || 1 }
         },
         {
           new: true,
@@ -95,7 +95,9 @@ export async function POST(request: Request) {
             {
               $set: { 
                 count: newCount,
-                lastUpdated: new Date()
+                lastUpdated: new Date(),
+                userAgent,
+                ipAddress: ip
               }
             }
           );

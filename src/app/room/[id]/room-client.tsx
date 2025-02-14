@@ -1,13 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { TVInterface } from '../../../components/TVInterface';
 import { type Room } from '../../../utils/roomsData';
 import { getPlaylistVideos, type YouTubeVideo } from '../../../utils/youtubeService';
 import { useYouTubePlayer } from '../../../contexts/YouTubePlayerContext';
-import { Loader2 } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
+import { TVStatic } from '../../../components/TVStatic';
 
 interface RoomClientProps {
   initialRoom: Room;
@@ -18,10 +18,11 @@ export default function RoomClient({ initialRoom, allRooms }: RoomClientProps) {
   const [sessionId] = useState(() => uuidv4()); // Generate unique session ID
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [videos, setVideos] = useState<YouTubeVideo[]>([]);
   const { togglePlay, toggleMute, player, setVolume } = useYouTubePlayer();
   const [isMobile, setIsMobile] = useState(false);
+  const [showStatic, setShowStatic] = useState(false);
+  const [nextRoom, setNextRoom] = useState<Room | null>(null);
 
   // Check for mobile screen size
   useEffect(() => {
@@ -135,6 +136,46 @@ export default function RoomClient({ initialRoom, allRooms }: RoomClientProps) {
     };
   }, [initialRoom.id, sessionId]);
 
+  const handleChannelChange = useCallback(async (newRoom: Room) => {
+    if (showStatic || newRoom.id === initialRoom.id) return;
+    
+    try {
+      // Show static first
+      setShowStatic(true);
+      setNextRoom(newRoom);
+      
+      // Pre-load the videos while static effect is playing
+      const videos = await getPlaylistVideos(newRoom.playlistId);
+      
+      if (videos.length === 0) {
+        throw new Error('No videos found in this playlist');
+      }
+      
+      // Store the videos for the next room
+      sessionStorage.setItem('selectedRoom', JSON.stringify(newRoom));
+      sessionStorage.setItem('roomVideos', JSON.stringify(videos));
+
+      // Wait for static effect (0.7s total for visual + sound)
+      await new Promise(resolve => setTimeout(resolve, 700));
+      
+      // Now navigate
+      router.push(`/room/${newRoom.id}`);
+    } catch (err) {
+      const errorMessage = err instanceof Error 
+        ? err.message 
+        : 'Failed to load playlist videos';
+      setError(errorMessage);
+      console.error('Error loading playlist videos:', err);
+      setShowStatic(false);
+      setNextRoom(null);
+    }
+  }, [showStatic, initialRoom.id, router]);
+
+  const handleStaticComplete = useCallback(() => {
+    setShowStatic(false);
+    setNextRoom(null);
+  }, []);
+
   // Handle keyboard shortcuts
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
@@ -167,7 +208,7 @@ export default function RoomClient({ initialRoom, allRooms }: RoomClientProps) {
           const prevIndex = currentIndex > 0 ? currentIndex - 1 : allRooms.length - 1;
           const prevRoom = allRooms[prevIndex];
           if (prevRoom) {
-            router.push(`/room/${prevRoom.id}`);
+            handleChannelChange(prevRoom);
           }
           break;
         }
@@ -179,7 +220,7 @@ export default function RoomClient({ initialRoom, allRooms }: RoomClientProps) {
           const nextIndex = currentIndex < allRooms.length - 1 ? currentIndex + 1 : 0;
           const nextRoom = allRooms[nextIndex];
           if (nextRoom) {
-            router.push(`/room/${nextRoom.id}`);
+            handleChannelChange(nextRoom);
           }
           break;
         }
@@ -208,7 +249,7 @@ export default function RoomClient({ initialRoom, allRooms }: RoomClientProps) {
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [togglePlay, toggleMute, initialRoom.id, allRooms, router, player, setVolume]);
+  }, [togglePlay, toggleMute, initialRoom.id, allRooms, handleChannelChange, player, setVolume]);
 
   // Load initial videos
   useEffect(() => {
@@ -217,7 +258,6 @@ export default function RoomClient({ initialRoom, allRooms }: RoomClientProps) {
     const loadVideos = async () => {
       try {
         if (!isMounted) return;
-        setIsLoading(true);
         setError(null);
 
         // Try to get pre-loaded videos first
@@ -228,7 +268,6 @@ export default function RoomClient({ initialRoom, allRooms }: RoomClientProps) {
           sessionStorage.removeItem('roomVideos');
           if (isMounted) {
             setVideos(parsedVideos);
-            setIsLoading(false);
           }
           return;
         }
@@ -241,13 +280,11 @@ export default function RoomClient({ initialRoom, allRooms }: RoomClientProps) {
 
         if (isMounted) {
           setVideos(roomVideos);
-          setIsLoading(false);
         }
       } catch (error) {
         console.error('Error loading videos:', error);
         if (isMounted) {
           setError(error instanceof Error ? error.message : 'Failed to load videos');
-          setIsLoading(false);
         }
       }
     };
@@ -255,24 +292,6 @@ export default function RoomClient({ initialRoom, allRooms }: RoomClientProps) {
     loadVideos();
     return () => { isMounted = false; };
   }, [initialRoom.playlistId]);
-
-  const handleChannelChange = async (newRoom: Room) => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      const videos = await getPlaylistVideos(newRoom.playlistId);
-      if (!videos || videos.length === 0) {
-        throw new Error('No videos available in the selected room');
-      }
-      sessionStorage.setItem('selectedRoom', JSON.stringify(newRoom));
-      sessionStorage.setItem('roomVideos', JSON.stringify(videos));
-      router.push(`/room/${newRoom.id}`);
-    } catch (error) {
-      console.error('Error changing room:', error);
-      setError(error instanceof Error ? error.message : 'Failed to change room');
-      setIsLoading(false);
-    }
-  };
 
   if (error) {
     return (
@@ -291,16 +310,7 @@ export default function RoomClient({ initialRoom, allRooms }: RoomClientProps) {
     );
   }
 
-  if (isLoading || !videos.length) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="flex items-center gap-3 text-white">
-          <Loader2 className="w-6 h-6 animate-spin" />
-          <p>Loading room...</p>
-        </div>
-      </div>
-    );
-  }
+  if (!videos.length) return null;
 
   return (
     <div className="min-h-screen bg-black">
@@ -310,6 +320,14 @@ export default function RoomClient({ initialRoom, allRooms }: RoomClientProps) {
         allRooms={allRooms}
         initialVideos={videos}
       />
+      {/* Static Effect */}
+      <TVStatic isVisible={showStatic} onAnimationComplete={handleStaticComplete} />
+      {/* Channel Number */}
+      {showStatic && nextRoom && (
+        <div className="fixed top-4 right-4 bg-black/80 text-green-500 font-mono px-4 py-2 rounded-lg text-2xl z-[70]">
+          CH {nextRoom.channelNumber}
+        </div>
+      )}
       {/* Footer */}
       <div className="fixed bottom-[6.3rem] sm:bottom-[5.8rem] bg-white dark:bg-gray-900/0 backdrop-blur-lg p-4 left-0 right-0 text-center z-50">
         <p className="text-white/40 text-[10px] sm:text-xs md:text-sm font-mono px-2 sm:px-4">

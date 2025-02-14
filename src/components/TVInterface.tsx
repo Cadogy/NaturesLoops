@@ -12,6 +12,7 @@ import AudioPlayer from './AudioPlayer';
 import { useRouter } from 'next/navigation';
 import { AboutDialog } from './AboutDialog';
 import type { YouTubeEvent } from 'react-youtube';
+import { TVStatic } from './TVStatic';
 
 declare global {
   interface Window {
@@ -40,6 +41,8 @@ export function TVInterface({ room, onChannelChange, allRooms, initialVideos }: 
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [showStatic, setShowStatic] = useState(false);
+  const [nextRoom, setNextRoom] = useState<Room | null>(null);
   const router = useRouter();
 
   const {
@@ -187,28 +190,54 @@ export function TVInterface({ room, onChannelChange, allRooms, initialVideos }: 
       setIsLoading(true);
       setError(null);
       setShowChannelNumber(true);
+      setNextRoom(newRoom);
       
+      // Show static first
+      setShowStatic(true);
+      
+      // Wait a small amount of time for the static to start
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Pre-load the videos while static effect is playing
       const videos = await getPlaylistVideos(newRoom.playlistId);
       
       if (videos.length === 0) {
         throw new Error('No videos found in this playlist');
       }
       
-      setPlayerRoom(newRoom, videos);
+      // Store the videos for the next room
+      sessionStorage.setItem('selectedRoom', JSON.stringify(newRoom));
+      sessionStorage.setItem('roomVideos', JSON.stringify(videos));
+
+      // Wait for static effect (0.7s total for visual + sound)
+      await new Promise(resolve => setTimeout(resolve, 700));
+      
+      // Now navigate
       onChannelChange(newRoom);
+      router.push(`/room/${newRoom.id}`);
     } catch (err) {
       const errorMessage = err instanceof YouTubeApiError 
         ? err.message 
         : 'Failed to load playlist videos';
       setError(errorMessage);
       console.error('Error loading playlist videos:', err);
+      setShowStatic(false);
+      setNextRoom(null);
     } finally {
       setIsLoading(false);
+      setShowStatic(false);
       setTimeout(() => {
         setShowChannelNumber(false);
       }, 1500);
     }
-  }, [isLoading, room.id, onChannelChange, setPlayerRoom]);
+  }, [isLoading, room.id, onChannelChange, router]);
+
+  // Remove the separate handleStaticComplete since we're handling it in the channel change
+  const handleStaticComplete = useCallback(() => {
+    // This is now just for animation cleanup
+    setShowStatic(false);
+    setNextRoom(null);
+  }, []);
 
   return (
     <Tooltip.Provider delayDuration={300}>
@@ -227,7 +256,7 @@ export function TVInterface({ room, onChannelChange, allRooms, initialVideos }: 
             {/* Channel Number */}
             {showChannelNumber && (
               <div className="absolute top-4 right-4 bg-black/80 text-green-500 font-mono px-4 py-2 rounded-lg text-2xl z-40">
-                CH {room.channelNumber}
+                CH {nextRoom?.channelNumber || room.channelNumber}
               </div>
             )}
 
@@ -272,7 +301,10 @@ export function TVInterface({ room, onChannelChange, allRooms, initialVideos }: 
               )}
             </div>
 
-            {/* Error and Loading States */}
+            {/* Static Effect */}
+            <TVStatic isVisible={showStatic} onAnimationComplete={handleStaticComplete} />
+
+            {/* Error State */}
             {error && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/80 text-white z-10">
                 <div className="text-center">
