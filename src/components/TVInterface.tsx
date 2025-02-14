@@ -19,6 +19,11 @@ declare global {
       PlayerState: {
         ENDED: number;
         UNSTARTED: number;
+        PLAYING: number;
+        PAUSED: number;
+        BUFFERING: number;
+        CUED: number;
+        ERROR: number;
       };
     };
   }
@@ -131,12 +136,32 @@ export function TVInterface({ room, onChannelChange, allRooms, initialVideos }: 
     }
   }, [room, initialVideos, setPlayerRoom]);
 
-  // Ensure video plays on page load/refresh
+  // Ensure video plays on page load/refresh and handle errors
   const handlePlayerReady = useCallback((event: YouTubeEvent) => {
-    // Force playback to start
-    event.target.playVideo();
-    onPlayerReady(event);
-  }, [onPlayerReady]);
+    try {
+      // Force playback to start
+      event.target.playVideo();
+      
+      // Check if video is actually playable
+      const playerState = (event.target.getPlayerState() as unknown) as number;
+      if (playerState === -1) { // UNSTARTED = -1
+        setTimeout(() => {
+          const newState = (event.target.getPlayerState() as unknown) as number;
+          if (newState === -1) { // Still UNSTARTED
+            // Video still unstarted after delay, likely unavailable
+            console.warn('Video appears to be unavailable, skipping to next track');
+            playNext();
+            return;
+          }
+        }, 2000); // Give it 2 seconds to start
+      }
+      
+      onPlayerReady(event);
+    } catch (error) {
+      console.error('Error during player ready:', error);
+      playNext();
+    }
+  }, [onPlayerReady, playNext]);
 
   const handlePlayerStateChange = useCallback((event: YouTubeEvent) => {
     // If video ends or is unstarted, try to play it
@@ -144,8 +169,13 @@ export function TVInterface({ room, onChannelChange, allRooms, initialVideos }: 
         event.data === window.YT?.PlayerState?.UNSTARTED) {
       event.target.playVideo();
     }
+    // Handle video errors (unavailable, deleted, etc.)
+    else if (event.data === window.YT?.PlayerState?.ERROR) {
+      console.warn('Video unavailable or error occurred, skipping to next track');
+      playNext();
+    }
     onPlayerStateChange(event);
-  }, [onPlayerStateChange]);
+  }, [onPlayerStateChange, playNext]);
 
   // Handle double tap for mobile play/pause and room switching
   const handleDoubleTap = (e: React.MouseEvent) => {
