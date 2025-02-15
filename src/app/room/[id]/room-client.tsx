@@ -9,6 +9,16 @@ import { useYouTubePlayer } from '../../../contexts/YouTubePlayerContext';
 import { v4 as uuidv4 } from 'uuid';
 import { TVStatic } from '../../../components/TVStatic';
 
+// Shuffle array utility function
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
 interface RoomClientProps {
   initialRoom: Room;
   allRooms: Room[];
@@ -267,7 +277,7 @@ export default function RoomClient({ initialRoom, allRooms }: RoomClientProps) {
           const parsedVideos = JSON.parse(storedVideos);
           sessionStorage.removeItem('roomVideos');
           if (isMounted) {
-            setVideos(parsedVideos);
+            setVideos(shuffleArray(parsedVideos));
           }
           return;
         }
@@ -279,7 +289,7 @@ export default function RoomClient({ initialRoom, allRooms }: RoomClientProps) {
         }
 
         if (isMounted) {
-          setVideos(roomVideos);
+          setVideos(shuffleArray(roomVideos));
         }
       } catch (error) {
         console.error('Error loading videos:', error);

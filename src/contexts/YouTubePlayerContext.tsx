@@ -57,6 +57,16 @@ const safeStorage = {
   },
 };
 
+// Shuffle array utility function
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
 export function YouTubePlayerProvider({ children }: { children: React.ReactNode }) {
   const playerRef = useRef<YouTubePlayer | null>(null);
   const [isReady, setIsReady] = useState(false);
@@ -142,9 +152,15 @@ export function YouTubePlayerProvider({ children }: { children: React.ReactNode 
         break;
       case 0: // ended
         if (playlist.length > 0) {
-          const nextIndex = (currentIndex + 1) % playlist.length;
-          player.loadVideoById(playlist[nextIndex].id);
-          setCurrentIndex(nextIndex);
+          // Shuffle the remaining videos and pick the next one
+          const remainingVideos = playlist.filter((_, index) => index !== currentIndex);
+          const shuffledRemaining = shuffleArray(remainingVideos);
+          const nextVideo = shuffledRemaining[0];
+          const newPlaylist = [playlist[currentIndex], ...shuffledRemaining];
+          
+          setPlaylist(newPlaylist);
+          setCurrentIndex(1); // Set to 1 since we put the current video at index 0
+          player.loadVideoById(nextVideo.id);
           player.setPlaybackQuality('hd1080');
         }
         break;
