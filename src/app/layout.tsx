@@ -2,17 +2,20 @@ import type { Metadata } from 'next';
 import { Inter, Poppins } from 'next/font/google';
 import './globals.css';
 import { Providers } from './providers';
+import { YouTubePlayerProvider } from '../contexts/YouTubePlayerContext';
+import { PictureInPicture } from '../components/PictureInPicture';
+import { Toaster } from 'react-hot-toast';
 
 const inter = Inter({ subsets: ['latin'] });
-const poppins = Poppins({ 
-  weight: ['400', '500', '600', '700'],
+const poppins = Poppins({
   subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
   variable: '--font-poppins',
 });
 
 export const metadata: Metadata = {
-  title: "Nature's Loops",
-  description: "A curated collection of lo-fi music channels inspired by nature's beauty",
+  title: "Nature's Loops - Ambient Music for Focus, Study, and Relaxation",
+  description: 'Immerse yourself in endless ambient music loops from nature, perfect for studying, working, or relaxing.',
   keywords: ['lofi', 'music', 'nature', 'study', 'relax', 'ambient', 'tv interface', 'retro'],
   authors: [{ name: 'Kevin Knapp' }],
   creator: 'Kevin Knapp',
@@ -82,9 +85,23 @@ export default function RootLayout({
       </head>
       <body className={`${inter.className} ${poppins.variable}`}>
         <Providers>
-          <main className="h-full w-full">
-            {children}
-          </main>
+          <YouTubePlayerProvider>
+            <main className="h-full w-full relative">
+              {children}
+            </main>
+            <div className="fixed-layer">
+              <PictureInPicture />
+            </div>
+            <Toaster 
+              position="bottom-center"
+              toastOptions={{
+                style: {
+                  background: '#333',
+                  color: '#fff',
+                },
+              }}
+            />
+          </YouTubePlayerProvider>
         </Providers>
       </body>
     </html>

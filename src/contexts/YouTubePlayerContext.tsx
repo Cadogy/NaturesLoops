@@ -1,3 +1,5 @@
+'use client'
+
 import React, { createContext, useContext, useRef, useState, useCallback, useEffect } from 'react';
 import type { YouTubePlayer, YouTubeEvent } from 'react-youtube';
 import type { YouTubeVideo } from '../utils/youtubeService';
@@ -138,6 +140,13 @@ export function YouTubePlayerProvider({ children }: { children: React.ReactNode 
     setPlayerState(state => ({ ...state, isPlaying: true }));
   }, [playerState.volume, playerState.isMuted]);
 
+  const playNext = useCallback(() => {
+    if (!playerRef.current || !isReady || !playlist.length) return;
+    const nextIndex = (currentIndex + 1) % playlist.length;
+    setCurrentIndex(nextIndex);
+    playerRef.current.loadVideoById(playlist[nextIndex].id);
+  }, [isReady, playlist, currentIndex]);
+
   const handleStateChange = useCallback((event: YouTubeEvent) => {
     const player = event.target;
     const state = event.data;
@@ -147,9 +156,24 @@ export function YouTubePlayerProvider({ children }: { children: React.ReactNode 
     
     switch (state) {
       case -1: // unstarted
+        // Give the video a short time to start, if it doesn't, assume it's unavailable
+        const unstartedTimeout = setTimeout(async () => {
+          try {
+            const currentState = await player.getPlayerState();
+            if (currentState === window.YT.PlayerState.UNSTARTED) {
+              console.warn('Video failed to start, skipping to next video');
+              playNext();
+            }
+          } catch (error) {
+            console.error('Error checking player state:', error);
+          }
+        }, 3000);
+        
         player.setPlaybackQuality('hd1080');
         player.playVideo(); // Try to start playback
-        break;
+        
+        return () => clearTimeout(unstartedTimeout);
+        
       case 0: // ended
         if (playlist.length > 0) {
           // Shuffle the remaining videos and pick the next one
@@ -164,20 +188,31 @@ export function YouTubePlayerProvider({ children }: { children: React.ReactNode 
           player.setPlaybackQuality('hd1080');
         }
         break;
+        
       case 1: // playing
         setPlayerState(state => ({ ...state, isPlaying: true }));
         break;
+        
       case 2: // paused
         setPlayerState(state => ({ ...state, isPlaying: false }));
         break;
+        
       case 3: // buffering
         player.setPlaybackQuality('hd1080');
         break;
+        
       case 5: // video cued
         player.playVideo(); // Start playing when video is cued
         break;
+        
+      case 100: // The video requested was not found
+      case 101: // The owner of the requested video does not allow it to be played in embedded players
+      case 150: // Same as 101
+        console.warn('Video unavailable (error code:', state, '), skipping to next video');
+        playNext();
+        break;
     }
-  }, [playlist, currentIndex, setCurrentIndex]);
+  }, [playlist, currentIndex, setCurrentIndex, playNext, setPlaylist]);
 
   const play = useCallback(() => {
     if (!playerRef.current || !isReady) return;
@@ -222,13 +257,6 @@ export function YouTubePlayerProvider({ children }: { children: React.ReactNode 
     if (!playerRef.current || !isReady) return;
     playerRef.current.seekTo(time, true);
   }, [isReady]);
-
-  const playNext = useCallback(() => {
-    if (!playerRef.current || !isReady || !playlist.length) return;
-    const nextIndex = (currentIndex + 1) % playlist.length;
-    setCurrentIndex(nextIndex);
-    playerRef.current.loadVideoById(playlist[nextIndex].id);
-  }, [isReady, playlist, currentIndex]);
 
   const playPrevious = useCallback(() => {
     if (!playerRef.current || !isReady || !playlist.length) return;

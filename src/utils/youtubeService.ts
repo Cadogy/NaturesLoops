@@ -33,6 +33,9 @@ interface YouTubePlaylistItem {
     videoId?: string;
     videoPublishedAt?: string;
   };
+  status?: {
+    privacyStatus: string;
+  };
 }
 
 interface YouTubeApiResponse {
@@ -144,7 +147,7 @@ export const getPlaylistVideos = async (playlistId: string): Promise<YouTubeVide
     console.log('Fetching playlist:', playlistId);
 
     // Get all videos from the playlist
-    const apiUrl = `https://youtube.googleapis.com/youtube/v3/playlistItems?part=snippet,contentDetails&maxResults=50&playlistId=${playlistId}&key=${YOUTUBE_API_KEY}`;
+    const apiUrl = `https://youtube.googleapis.com/youtube/v3/playlistItems?part=snippet,contentDetails,status&maxResults=50&playlistId=${playlistId}&key=${YOUTUBE_API_KEY}`;
     const response = await fetch(apiUrl, {
       cache: 'no-store' // Disable Next.js cache to always get fresh data
     });
@@ -175,8 +178,24 @@ export const getPlaylistVideos = async (playlistId: string): Promise<YouTubeVide
       return [];
     }
 
+    // Filter out deleted, private, or unavailable videos
     const videos = data.items
-      .filter(item => item.snippet && item.snippet.resourceId && item.snippet.resourceId.videoId)
+      .filter(item => {
+        // Check if video has required data
+        if (!item.snippet || !item.snippet.resourceId || !item.snippet.resourceId.videoId) {
+          return false;
+        }
+
+        // Check if video is not private, deleted, or rejected
+        if (item.status?.privacyStatus === 'private' || 
+            item.snippet.title === 'Private video' || 
+            item.snippet.title === 'Deleted video') {
+          console.log(`Filtered out unavailable video: ${item.snippet.resourceId.videoId}`);
+          return false;
+        }
+
+        return true;
+      })
       .map((item: YouTubePlaylistItem) => ({
         id: item.snippet.resourceId?.videoId || '',
         title: item.snippet.title,
@@ -186,7 +205,7 @@ export const getPlaylistVideos = async (playlistId: string): Promise<YouTubeVide
       }))
       .filter(video => video.id); // Remove any videos without IDs
 
-    console.log(`Found ${videos.length} videos in playlist:`, playlistId);
+    console.log(`Found ${videos.length} available videos in playlist:`, playlistId);
     
     // Cache the videos
     videosCache[playlistId] = videos;

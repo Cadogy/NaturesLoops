@@ -205,3 +205,17 @@ body {
               -0.025em -0.05em 0 rgba(0, 255, 0, 0.75),
               0.025em 0.05em 0 rgba(0, 0, 255, 0.75);
 }
+
+.fixed-layer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+.fixed-layer > * {
+  pointer-events: auto;
+}
