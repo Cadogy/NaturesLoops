@@ -1,17 +1,22 @@
 # Nature's Loops
 
+<div align="center">
+  <img src="public/images/git_demo.png" alt="Nature's Loops Demo" />
+  <p>Developed by <a href="https://www.cadogy.com">Cadogy</a></p>
+</div>
+
+## About Nature's Loops
+
 Nature's Loops is a Next.js web application that provides a beautiful interface for exploring lo-fi music inspired by nature. Perfect for relaxation, focus, and meditation.
 
-![Nature's Loops](public/images/git_demo.png)
-
-## 🔥 Features
+## Features
 
 - **Responsive Design**: Beautiful UI that works on mobile and desktop
 - **Modern Interface**: Clean, intuitive user interface with smooth animations
 - **Social Integration**: Easy access to YouTube and Instagram channels
 - **Component Library**: Built with shadcn/ui components for a consistent design language
 
-## 🚀 Technology Stack
+## Technology Stack
 
 - **Framework**: [Next.js 14](https://nextjs.org/)
 - **Language**: [TypeScript](https://www.typescriptlang.org/)
@@ -25,7 +30,7 @@ Nature's Loops is a Next.js web application that provides a beautiful interface 
 - **Carousel**: [Embla Carousel](https://www.embla-carousel.com/)
 - **Toast Notifications**: [Sonner](https://sonner.emilkowal.ski/)
 
-## 📦 Installation
+## Getting Started
 
 ### Prerequisites
 
@@ -33,7 +38,7 @@ Nature's Loops is a Next.js web application that provides a beautiful interface 
 - npm or yarn
 - Git
 
-### Setup
+### Installation
 
 1. Clone the repository
    ```bash
@@ -63,15 +68,7 @@ Nature's Loops is a Next.js web application that provides a beautiful interface 
 
 5. Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## 📚 Usage
-
-Nature's Loops provides a simple interface for users to:
-
-- Browse through curated music collections
-- Connect with the community through social links
-- Experience a visually pleasing UI tailored to enhance the listening experience
-
-## 🎮 Development
+## Development
 
 ### Directory Structure
 
@@ -97,7 +94,7 @@ natures-loops/
 - `npm run start` - Start production server
 - `npm run lint` - Run ESLint
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
@@ -107,7 +104,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## 📝 License
+## License
 
 MIT License
 
